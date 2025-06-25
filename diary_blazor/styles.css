@@ -6,3 +6,9 @@
 @theme {
     --font-inter: 'Inter', sans-serif;
 }
+
+@layer base {
+    * {
+        @apply transition-all duration-200 ease-in-out;
+    }
+}
