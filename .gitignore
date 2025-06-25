@@ -1,0 +1,49 @@
+# Build artifacts
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code settings
+.vscode/
+
+# Visual Studio settings
+.vs/
+
+# Rider settings
+.idea/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish output
+wwwroot/dist/
+wwwroot/build/
+
+# Logs
+*.log
+
+# Others
+*.db
+*.db-shm
+*.db-wal
+
+# Environment secrets
+appsettings.Development.json
+secrets.json
+
+# Node.js (nếu dùng npm, ví dụ Tailwind)
+node_modules/
+package-lock.json
+
+# Tailwind / PostCSS output (nếu có)
+*.css.map
+
+# JetBrains Rider & ReSharper
+*.DotSettings.user
+_ReSharper*/

@@ -1,0 +1,35 @@
+﻿
+<div class="flex justify-evenly w-full h-15 bg-gray-100 dark:bg-gray-800 border-b border-b-gray-300 px-6">
+	<a href="#" class="flex items-center text-lg font-bold no-underline">
+		<img src="images/logo.png" alt="Logo" width="50" />
+		<span class="text-2xl translate-y-3 -translate-x-1 text-blue-600">iary</span>
+	</a>
+	<div class="flex items-center w-full justify-center">
+		<div class="flex items-center bg-gray-200 rounded-lg px-4 md:w-[30rem] sm:w-[20rem] h-10 max-w-xl shadow-sm">
+			<i class="fa-solid fa-magnifying-glass"></i>
+			<input type="text"
+				   placeholder="Type to search..."
+				   class="ml-3 bg-transparent outline-none w-full h-10 text-gray-700 placeholder-gray-500" />
+		</div>
+	</div>
+	<div class="flex gap-2 items-center">
+		<div class="w-10 h-10 flex justify-center items-center">M</div>
+		<div @onclick="Toggle" class=" w-10 h-10 flex justify-center items-center rounded-full bg-gray-200 hover:scale-105 transition-transform cursor-pointer">
+			<i class="fa-solid fa-sun fa-lg"></i>
+		</div>
+	</div>
+</div>
+
+@code {
+
+	private bool _darkMode = false;
+
+	[Parameter]
+	public EventCallback<bool> OnDarkModeToggled { get; set; }
+
+	private void Toggle()
+	{
+		_darkMode = !_darkMode;
+		OnDarkModeToggled.InvokeAsync(_darkMode);
+	}
+}
