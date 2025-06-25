@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<div class='font-inter @(_darkMode ? "dark" : "")'>
+<div class='font-inter dark:text-white @(_darkMode ? "dark" : "")'>
     <NavMenu OnDarkModeToggled="@HandleDarkModeToggled" />
     <div class="h-screen">
         @Body
