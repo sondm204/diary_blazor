@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+
+<LumexThemeProvider />
+
+<div class='font-inter dark:text-white @(_darkMode ? "dark" : "")'>
+	<NavMenu OnDarkModeToggled="@HandleDarkModeToggled" />
+	<div class="h-screen">
+		@Body
+	</div>
+</div>
+
+
+@code
+{
+	private bool _darkMode = false;
+
+	private void HandleDarkModeToggled(bool isDarkMode)
+	{
+		_darkMode = isDarkMode;
+	}
+}
