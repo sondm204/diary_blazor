@@ -1,7 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard</PageTitle>
 
 <div class="flex bg-gray-100 dark:bg-[#282135] h-full">
 	@* sidebar *@
@@ -38,60 +38,54 @@
 	@* content *@
 	<div class="w-full bg-white p-8 flex flex-col gap-2 dark:bg-gray-800 dark:text-white">
 		<div class="flex items-center justify-between">
-			<select id="countries" class="w-50 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+			@* <select id="countries" class="w-50 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 				<option selected>Tất cả</option>
 				<option value="publish">Đã công bố</option>
 				<option value="draft">Bài đăng nháp</option>
 				<option value="trash">Thùng rác</option>
-			</select>
+			</select> *@
+			<LumexSelect TValue="string"
+						 Label=""
+						 Class="w-52"
+						 Value="@(_selectedFilter)">
+				@foreach (var filter in _filter)
+				{
+					<LumexSelectItem @key=@filter Value="@filter.Key" TextValue="@filter.Value" >@filter.Value</LumexSelectItem>
+				}
+
+			</LumexSelect>
 			<div>Quản lý</div>
 		</div>
-		<div class="shadow-lg p-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-200 dark:hover:bg-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white cursor-pointer">
-			<div class="flex justify-between">
-				<div class="flex gap-2 items-center">
-					<img class="w-20 h-20 rounded-lg" src="https://mediawinwin.vn/upload/images/sanpham/bao-gia-chup-mon-an-dich-vu-chup-anh-do-an-chuyen-nghiep-5.JPG" alt="Alternate Text" />
-					<div class="flex flex-col gap-2">
-						<h1 class="font-bold text-lg">Bài viết 1</h1>
-						<div class="text-gray-400 text-sm">Đã xuất bản 12/06/2025</div>
-					</div>
-				</div>
-				<div class="flex flex-col gap-4 items-end justify-center">
-					<div class="flex gap-4 items-center">
-						<span class="cursor-pointer text-xl text-gray-500 hover:text-blue-500"><i class="fa-solid fa-paper-plane"></i></span>
-						<span class="cursor-pointer text-2xl text-gray-500 hover:text-blue-500"><i class="fa-solid fa-tag"></i></span>
-						<span class="cursor-pointer text-xl text-gray-500 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></span>
-						<span class="cursor-pointer text-xl text-gray-500 hover:text-blue-500"><i class="fa-solid fa-eye"></i></span>
-						<span class="w-8 h-8 bg-gray-500 rounded-full p-2"></span>
-					</div>
-					<div class="flex gap-2 items-center">
-						<span class="cursor-pointer text-2xl text-gray-500 hover:text-blue-500"><i class="fa-solid fa-share-nodes"></i></span>
-						<div class="flex items-center gap-1">
-							<span class="text-sm text-gray-500">0</span>
-							<span class="text-gray-500"><i class="fa-solid fa-message"></i></span>
-						</div>
-						<div class="flex items-center gap-1">
-							<span class="text-sm text-gray-500">0</span>
-							<span class="text-gray-500"><i class="fa-solid fa-chart-column"></i></span>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div class="flex flex-col gap-4">
+			@foreach (var diary in diaries)
+			{
+				<DiaryItem Title="@diary.Title" />
+			}
 		</div>
-		@foreach(var diary in diaries) {
-			@diary.Title;
-		}
-		<button class="p-2 bg-red-500" @onclick="getDiaries">click</button>
 	</div>
 </div>
 
 @code {
-	DiaryContext context = new DiaryContext(); 
+	private Dictionary<string, string> _filter = new()
+	{
+		["all"] = "Tất cả",
+		["publish"] = "Đã công bố",
+		["draft"] = "Bài đăng nháp",
+		["trash"] = "Thùng rác"
+	};
+	private string _selectedFilter = "all";
+
+
+	DiaryContext context = new DiaryContext();
 	List<Diary> diaries = new List<Diary>();
+	protected override void OnInitialized()
+	{
+		getDiaries();
+	}
 
 	protected void getDiaries()
 	{
 		// Load diaries from the database
-		diaries = context.Diaries.ToList(); 
-		JS.InvokeVoidAsync("console.log", diaries);
+		diaries = context.Diaries.OrderByDescending(d => d.CreatedAt).ToList();
 	}
 }
