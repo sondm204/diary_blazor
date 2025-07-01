@@ -2,20 +2,29 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <link rel="stylesheet" href="diary_blazor_web.styles.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="css/output.css" />
-    <HeadOutlet />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<base href="/" />
+	<link rel="stylesheet" href="diary_blazor_web.styles.css" />
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet" href="css/output.css" />
+	<HeadOutlet />
 </head>
 
 <body>
-    <Routes />
-    <script src="_content/LumexUI/js/LumexUI.js" type="module"></script>
-    <script src="_framework/blazor.web.js"></script>
+	<Routes />
+	<script src="_content/LumexUI/js/LumexUI.js" type="module"></script>
+	<script src="_framework/blazor.web.js"></script>
+	<script src="https://cdn.tiny.cloud/1/dymocpoyh8m8t7vgrojw1c5jm1nxlmdc7ysndqhs27xcnlga/tinymce/5/tinymce.min.js"></script>
+	<script>
+		tinymce.init({
+		  selector: 'textarea#tiny',  // change this value according to your HTML
+		  plugins: 'a_tinymce_plugin',
+		  a_plugin_option: true,
+		  a_configuration_option: 400
+		});
+	</script>
 </body>
 
 </html>
