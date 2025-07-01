@@ -4,6 +4,7 @@ using LumexUI.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLumexServices();
+builder.Services.AddControllers();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -23,6 +24,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.MapControllers();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
