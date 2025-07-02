@@ -16,6 +16,7 @@ namespace diary_blazor_web.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
+            Console.WriteLine("UploadImage called.....................");
             if (file == null || file.Length == 0)
             {
                 return BadRequest("No file uploaded.");
