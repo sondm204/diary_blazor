@@ -1,5 +1,5 @@
 ﻿tinymce.init({
-    selector: '#tiny',  // ID của TextArea mà bạn muốn áp dụng TinyMCE
+    selector: 'textarea#tiny',  // ID của TextArea mà bạn muốn áp dụng TinyMCE
     plugins: [
     //    // Core editing features
         'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',

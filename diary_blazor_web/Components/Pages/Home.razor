@@ -1,6 +1,7 @@
 ﻿@page "/"
 @page "/dashboard"
 @rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -60,7 +61,8 @@
 		<div class="flex flex-col gap-4">
 			@foreach (var diary in diaries)
 			{
-				<DiaryItem Title="@diary.Title" />
+				<DiaryItem Title="@diary.Title"
+						   OnClick="() => NavigationToEditor(diary.Id)" />
 			}
 		</div>
 	</div>
@@ -88,5 +90,11 @@
 	{
 		// Load diaries from the database
 		diaries = context.Diaries.OrderByDescending(d => d.CreatedAt).ToList();
+	}
+
+	private void NavigationToEditor(string id)
+	{
+		// Navigate to the editor page with the specified diary ID
+		NavigationManager.NavigateTo($"/editor/{id}");
 	}
 }
