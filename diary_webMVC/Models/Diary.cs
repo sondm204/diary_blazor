@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace diary_blazor_web.Models;
+namespace diary_webMVC.Models;
 
 public partial class Diary
 {

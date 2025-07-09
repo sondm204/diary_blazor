@@ -6,11 +6,11 @@
 <div class="grid grid-cols-12 h-screen">
 	<div class="col-span-10">
 		<LumexTextbox Type="@InputType.Text"
-					Value="@diary.Title"
+					  @bind-Value="diary.Title"
 					  Label="Tiêu đề"
 					  Placeholder="john@doe.com"
 					  Class="w-full" />
-		<textarea id="tiny" @bind="editorToolValue" class="form-control h-full" style="width: 100%;"></textarea>
+		<textarea id="tiny" @bind="diary.Content" class="form-control h-full" style="width: 100%;"></textarea>
 	</div>
 	<div class="col-span-2">
 		<div class="">
@@ -31,11 +31,22 @@
 									   Expanded="@_expanded["tag"]"
 									   Class="ml-4">
 							<div>
-								<LumexTextbox Variant="InputVariant.Underlined" Type="@InputType.Email" Placeholder="Nhập nhãn dán" />
+								<div class="flex gap-1 whitespace-nowrap overflow-x-scroll">
+									@foreach (Tag tag in selectedTags)
+									{
+										<div class="text-xs p-1 bg-gray-300 rounded-full">
+											#@tag.Name
+
+											<span @onclick="() => selectedTags.Remove(tag)" class="cursor-pointer"><i class="fa-solid fa-xmark"></i></span>
+										</div>
+									}
+								</div>
+								<LumexTextbox Variant="InputVariant.Underlined" Value="@tagSearchValue" ValueChanged="HandleSearchTag" Type="@InputType.Text" Placeholder="Tìm nhãn..." />
 								<LumexListbox TValue="string">
-									<LumexListboxItem>New file</LumexListboxItem>
-									<LumexListboxItem>Edit file</LumexListboxItem>
-									<LumexListboxItem>Share file</LumexListboxItem>
+									@foreach (var tag in filterTags)
+									{
+										<LumexListboxItem OnClick="() => HandleSelectTag(tag.Id)" Value="@tag.Id">@tag.Name</LumexListboxItem>
+									}
 								</LumexListbox>
 							</div>
 						</LumexCollapse>
@@ -48,7 +59,7 @@
 						<LumexCollapse As="ul"
 									   Expanded="@_expanded["publish"]"
 									   Class="ml-4">
-							<div>hello</div>
+							<input type="date" @bind-value="diary.PublicedAt" @bind-value:format="yyyy-MM-dd" />
 						</LumexCollapse>
 					</div>
 					<div class="border-b border-b-gray-300">
@@ -60,9 +71,8 @@
 									   Expanded="@_expanded["share"]"
 									   Class="ml-4">
 							<LumexCheckboxGroup>
-								<LumexCheckbox>Công khai</LumexCheckbox>
-								<LumexCheckbox>Cho phép bình luận</LumexCheckbox>
-								<LumexCheckbox>Cho phép chia sẻ</LumexCheckbox>
+								<LumexCheckbox @bind-Value="IsPublic">Công khai</LumexCheckbox>
+								<LumexCheckbox @bind-Value="AllowComments">Cho phép bình luận</LumexCheckbox>
 							</LumexCheckboxGroup>
 						</LumexCollapse>
 					</div>
@@ -76,11 +86,25 @@
 	[Parameter] public string id { get; set; }
 	DiaryContext context = new DiaryContext();
 	Diary diary = new Diary();
-	public string editorToolValue;
+	List<Tag> allTags = new List<Tag>();
+	List<Tag> filterTags = new List<Tag>();
+	List<Tag> selectedTags = new List<Tag>();
+	string tagSearchValue = "";
+	private bool IsPublic
+	{
+		get => diary.IsPublic.HasValue && diary.IsPublic.Value != 0;
+		set => diary.IsPublic = (byte)(value ? 1 : 0);
+	}
+
+	private bool AllowComments
+	{
+		get => diary.AllowComments.HasValue && diary.AllowComments.Value != 0;
+		set => diary.AllowComments = (byte)(value ? 1 : 0);
+	}
+
 
 	protected override void OnInitialized()
 	{
-		editorToolValue = id;
 		if (!string.IsNullOrEmpty(id))
 		{
 			diary = context.Diaries
@@ -90,14 +114,32 @@
 			.FirstOrDefault(d => d.Id == id);
 			if (diary != null)
 			{
-				editorToolValue = diary.Content;
+				selectedTags = diary.Tags.ToList();
 			}
 		}
 		else
 		{
 			diary = new Diary();
-			editorToolValue = string.Empty;
 		}
+
+		allTags = context.Tags.ToList();
+	}
+
+	private void HandleSearchTag(string value)
+	{
+		filterTags = allTags
+		.Where(t => !string.IsNullOrEmpty(t.Name) && t.Name.Contains(value.Trim(), StringComparison.OrdinalIgnoreCase))
+		.ToList();
+	}
+
+	private void HandleSelectTag(string tagId)
+	{
+		Tag tag = allTags.FirstOrDefault(t => t.Id == tagId);
+		if (!selectedTags.Contains(tag))
+		{
+			selectedTags.Add(tag);
+		}
+		tagSearchValue = "";
 	}
 
 	private Dictionary<string, bool> _expanded = new Dictionary<string, bool>()
@@ -114,7 +156,9 @@
 
 	private void HandleSubmit()
 	{
-		Console.WriteLine(editorToolValue);
+		JS.InvokeVoidAsync("console.log", diary.Content);
+		diary.Tags = selectedTags;
+		context.SaveChanges();
 	}
 }
 
