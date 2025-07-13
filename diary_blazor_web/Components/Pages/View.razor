@@ -1,4 +1,5 @@
 ﻿@page "/view"
+@rendermode InteractiveServer
 
 <PageTitle>View</PageTitle>
 
@@ -6,3 +7,27 @@
 	<ViewContent />
 	<ViewSidebar />
 </div>
+
+@code {
+	private string currentUserId;
+	private DiaryContext context = new DiaryContext();
+
+	protected async override void OnInitialized()
+	{
+		if(AppState.CurrentUser == null)
+		{
+			currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
+			User user = context.Users.Find(currentUserId);
+			if(user == null)
+			{
+				user = new User();
+				Random random = new Random();
+				user.Id = currentUserId;
+				user.Username = "user" + random.Next(100000, 1000000);
+				context.Users.Add(user);
+				context.SaveChanges();
+			}
+			AppState.CurrentUser = user;
+		}
+	}
+}

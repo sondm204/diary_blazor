@@ -13,7 +13,7 @@ public partial class User
 
     public string? Password { get; set; }
 
-    public DateTime? CreateAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

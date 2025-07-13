@@ -1,16 +1,21 @@
-﻿@using System.Net.Http
-@using System.Net.Http.Json
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using Microsoft.AspNetCore.Components.Web.Virtualization
-@using Microsoft.JSInterop
-@using diary_blazor_web
-@using diary_blazor_web.Components
-@inject IJSRuntime JS
-@using LumexUI
-@using LumexUI.Common
-@using diary_blazor_web.Models
-@using diary_blazor_web.Components.View
-@using diary_blazor_web.Components.Dashboard
+﻿@using System.Net.Http  
+@using System.Net.Http.Json  
+@using Microsoft.AspNetCore.Components.Forms  
+@using Microsoft.AspNetCore.Components.Routing  
+@using Microsoft.AspNetCore.Components.Web  
+@using static Microsoft.AspNetCore.Components.Web.RenderMode  
+@using Microsoft.AspNetCore.Components.Web.Virtualization  
+@using Microsoft.JSInterop  
+@using diary_blazor_web  
+@using diary_blazor_web.Components  
+@inject IJSRuntime JS  
+@using LumexUI  
+@using LumexUI.Common  
+@using diary_blazor_web.Models  
+@using diary_blazor_web.Components.View  
+@using diary_blazor_web.Components.Dashboard  
+@using Microsoft.EntityFrameworkCore;
+@inject NavigationManager NavigationManager
+@inject AppState AppState
+@inject IJSRuntime JSRuntime
+

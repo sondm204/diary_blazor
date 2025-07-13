@@ -1,0 +1,195 @@
+﻿@page "/editor/{id}"
+@page "/editor"
+@rendermode InteractiveServer
+
+<PageTitle>Editor</PageTitle>
+
+<div class="grid grid-cols-12 h-screen">
+	<div class="col-span-10">
+		<LumexTextbox Type="@InputType.Text"
+					  Size="Size.Large"
+					  @bind-Value="diary.Title"
+					  Label="Tiêu đề"
+					  Placeholder="Nhập tiêu đề"
+					  Class="w-full" />
+		<textarea id="tiny" @bind="diary.Content" placeholder="Nhập nội dung" class="form-control h-full" style="width: 100%;"></textarea>
+	</div>
+	<div class="col-span-2">
+		<div class="">
+			<div class="flex gap-2 justify-evenly mb-2 mt-2">
+				<LumexButton Color="ThemeColor.Default" Variant="Variant.Ghost">Xem trước</LumexButton>
+				<LumexButton Color="ThemeColor.Primary" Variant="Variant.Solid" OnClick="HandleButtonClick">Lưu</LumexButton>
+			</div>
+			<LumexDivider />
+			<div class="p-3">
+				<h2 class="font-bold text-2xl text-center">Cài đặt nhật ký</h2>
+				<div class="flex flex-col">
+					<div class="border-b border-b-gray-300">
+						<div class="flex gap-2 w-full cursor-pointer p-4 hover:bg-gray-200 rounded-lg" @onclick="@(() => ToggleExpansion("tag"))">
+							<span class="@(_expanded["tag"] ? "rotate-180" : "")"><i class="fa-solid fa-caret-down"></i></span>
+							<span>Nhãn</span>
+						</div>
+						<LumexCollapse As="ul"
+									   Expanded="@_expanded["tag"]"
+									   Class="ml-4">
+							<div>
+								<div class="flex gap-1 whitespace-nowrap overflow-x-scroll">
+									@foreach (Tag tag in selectedTags)
+									{
+										<div class="text-xs p-1 bg-gray-300 rounded-full">
+											#@tag.Name
+
+											<span @onclick="() => selectedTags.Remove(tag)" class="cursor-pointer"><i class="fa-solid fa-xmark"></i></span>
+										</div>
+									}
+								</div>
+								<LumexTextbox Variant="InputVariant.Underlined" Value="@tagSearchValue" ValueChanged="HandleSearchTag" Type="@InputType.Text" Placeholder="Tìm nhãn..." />
+								<LumexListbox TValue="string">
+									@foreach (var tag in filterTags)
+									{
+										<LumexListboxItem OnClick="() => HandleSelectTag(tag.Id)" Value="@tag.Id">@tag.Name</LumexListboxItem>
+									}
+								</LumexListbox>
+							</div>
+						</LumexCollapse>
+					</div>
+					<div class="border-b border-b-gray-300">
+						<div class="flex gap-2 w-full cursor-pointer p-4 hover:bg-gray-200 rounded-lg" @onclick="@(() => ToggleExpansion("publish"))">
+							<span class="@(_expanded["publish"] ? "rotate-180" : "")"><i class="fa-solid fa-caret-down"></i></span>
+							<span>Được xuất bản vào</span>
+						</div>
+						<LumexCollapse As="ul"
+									   Expanded="@_expanded["publish"]"
+									   Class="ml-4">
+							<input type="date" @bind-value="diary.PublicedAt" @bind-value:format="yyyy-MM-dd" />
+						</LumexCollapse>
+					</div>
+					<div class="border-b border-b-gray-300">
+						<div class="flex gap-2 w-full cursor-pointer p-4 hover:bg-gray-200 rounded-lg" @onclick="@(() => ToggleExpansion("share"))">
+							<span class="@(_expanded["share"] ? "rotate-180" : "")"><i class="fa-solid fa-caret-down"></i></span>
+							<span>Chia sẻ</span>
+						</div>
+						<LumexCollapse As="ul"
+									   Expanded="@_expanded["share"]"
+									   Class="ml-4">
+							<LumexCheckboxGroup>
+								<LumexCheckbox @bind-Value="IsPublic">Công khai</LumexCheckbox>
+								<LumexCheckbox @bind-Value="AllowComments">Cho phép bình luận</LumexCheckbox>
+							</LumexCheckboxGroup>
+						</LumexCollapse>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private Boolean isCreate = false;
+	[Parameter] public string id { get; set; }
+	DiaryContext context = new DiaryContext();
+	Diary diary = new Diary();
+	List<Tag> allTags = new List<Tag>();
+	List<Tag> filterTags = new List<Tag>();
+	List<Tag> selectedTags = new List<Tag>();
+	string tagSearchValue = "";
+	private bool IsPublic
+	{
+		get => diary.IsPublic.HasValue && diary.IsPublic.Value != 0;
+		set => diary.IsPublic = (byte)(value ? 1 : 0);
+	}
+
+	private bool AllowComments
+	{
+		get => diary.AllowComments.HasValue && diary.AllowComments.Value != 0;
+		set => diary.AllowComments = (byte)(value ? 1 : 0);
+	}
+
+
+	protected override void OnInitialized()
+	{
+		if (!string.IsNullOrEmpty(id))
+		{
+			diary = context.Diaries
+			.Include(d => d.Tags)
+			.Include(d => d.Likes)
+			.Include(d => d.Comments)
+			.FirstOrDefault(d => d.Id == id);
+			if (diary != null)
+			{
+				selectedTags = diary.Tags.ToList();
+			}
+		}
+		else
+		{
+			diary = new Diary();
+		}
+
+		allTags = context.Tags.ToList();
+
+		isCreate = id == null;
+	}
+
+	private void HandleSearchTag(string value)
+	{
+		filterTags = allTags
+		.Where(t => !string.IsNullOrEmpty(t.Name) && t.Name.Contains(value.Trim(), StringComparison.OrdinalIgnoreCase))
+		.ToList();
+	}
+
+	private void HandleSelectTag(string tagId)
+	{
+		Tag tag = allTags.FirstOrDefault(t => t.Id == tagId);
+		if (!selectedTags.Contains(tag))
+		{
+			selectedTags.Add(tag);
+		}
+		tagSearchValue = "";
+	}
+
+	private Dictionary<string, bool> _expanded = new Dictionary<string, bool>()
+	{
+		{ "tag", true },
+		{ "publish", true },
+		{ "share", true},
+	};
+
+	private void ToggleExpansion(string key)
+	{
+		_expanded[key] = !_expanded[key];
+	}
+
+	private void HandleButtonClick()
+	{
+		if (isCreate) HandleCreate();
+		else HandleSubmit();
+	}
+
+	private void HandleSubmit()
+	{
+		JS.InvokeVoidAsync("console.log", diary.Content);
+		diary.Tags = selectedTags;
+		context.SaveChanges();
+	}
+
+	private void HandleCreate()  
+	{  
+		JS.InvokeVoidAsync("console.log", "create: " + diary.Content);  
+		Guid newId = Guid.NewGuid();
+		diary.Id = newId.ToString();
+		diary.Tags = selectedTags;
+		context.Diaries.Add(diary);
+		try
+		{
+			context.SaveChanges();  
+
+		}catch(Exception e)
+		{
+
+		}finally
+		{
+			NavigationManager.NavigateTo($"/editor/{newId}");
+		}
+	}
+}
+

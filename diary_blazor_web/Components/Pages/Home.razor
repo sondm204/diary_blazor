@@ -1,5 +1,7 @@
 ﻿@page "/"
+@page "/dashboard"
 @rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -7,7 +9,7 @@
 	@* sidebar *@
 	<div class="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex flex-col">
 		<div class="pb-2 border-b border-gray-200 dark:border-gray-700">
-			<div class="text-center p-2 bg-yellow-200/70 rounded-full text-lg text-yellow-700 font-semibold cursor-pointer hover:scale-105 transition-all duration-200">
+			<div @onclick="(() => NavigationToEditor(null))" class="text-center p-2 bg-yellow-200/70 rounded-full text-lg text-yellow-700 font-semibold cursor-pointer hover:scale-105 transition-all duration-200">
 				<i class="fa-solid fa-plus"></i>
 				Bài đăng mới
 			</div>
@@ -59,7 +61,8 @@
 		<div class="flex flex-col gap-4">
 			@foreach (var diary in diaries)
 			{
-				<DiaryItem Title="@diary.Title" />
+				<DiaryItem Title="@diary.Title"
+						   OnClick="() => NavigationToEditor(diary.Id)" />
 			}
 		</div>
 	</div>
@@ -87,5 +90,11 @@
 	{
 		// Load diaries from the database
 		diaries = context.Diaries.OrderByDescending(d => d.CreatedAt).ToList();
+	}
+
+	private void NavigationToEditor(string? id)
+	{
+		// Navigate to the editor page with the specified diary ID
+		NavigationManager.NavigateTo($"/editor/{id}");
 	}
 }

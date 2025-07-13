@@ -40,22 +40,22 @@ public partial class DiaryContext : DbContext
             entity.ToTable("comments");
 
             entity.Property(e => e.Id)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("id");
             entity.Property(e => e.Content)
-                .HasColumnType("text")
+                .HasColumnType("ntext")
                 .HasColumnName("content");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.DiaryId)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("diary_id");
             entity.Property(e => e.UserId)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("user_id");
 
@@ -75,14 +75,14 @@ public partial class DiaryContext : DbContext
             entity.ToTable("diaries");
 
             entity.Property(e => e.Id)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("id");
             entity.Property(e => e.AllowComments)
                 .HasDefaultValue((byte)1)
                 .HasColumnName("allow_comments");
             entity.Property(e => e.Content)
-                .HasColumnType("text")
+                .HasColumnType("ntext")
                 .HasColumnName("content");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -105,7 +105,7 @@ public partial class DiaryContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("user_id");
 
@@ -129,11 +129,11 @@ public partial class DiaryContext : DbContext
                         j.HasKey("DiaryId", "TagId").HasName("PK__diary_ta__47BB58E31CDEBF93");
                         j.ToTable("diary_tags");
                         j.IndexerProperty<string>("DiaryId")
-                            .HasMaxLength(20)
+                            .HasMaxLength(100)
                             .IsUnicode(false)
                             .HasColumnName("diary_id");
                         j.IndexerProperty<string>("TagId")
-                            .HasMaxLength(20)
+                            .HasMaxLength(100)
                             .IsUnicode(false)
                             .HasColumnName("tag_id");
                     });
@@ -146,7 +146,7 @@ public partial class DiaryContext : DbContext
             entity.ToTable("likes");
 
             entity.Property(e => e.Id)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("id");
             entity.Property(e => e.CreatedAt)
@@ -154,11 +154,11 @@ public partial class DiaryContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.DiaryId)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("diary_id");
             entity.Property(e => e.UserId)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("user_id");
 
@@ -178,7 +178,7 @@ public partial class DiaryContext : DbContext
             entity.ToTable("tags");
 
             entity.Property(e => e.Id)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("id");
             entity.Property(e => e.Name)
@@ -195,12 +195,12 @@ public partial class DiaryContext : DbContext
             entity.HasIndex(e => e.Username, "UQ__users__F3DBC5726FEB3C28").IsUnique();
 
             entity.Property(e => e.Id)
-                .HasMaxLength(20)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("id");
-            entity.Property(e => e.CreateAt)
+            entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("create_at");
+                .HasColumnName("created_at");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .IsUnicode(false)

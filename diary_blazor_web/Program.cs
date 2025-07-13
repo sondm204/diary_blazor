@@ -1,9 +1,12 @@
+using diary_blazor_web;
 using diary_blazor_web.Components;
 using LumexUI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLumexServices();
+builder.Services.AddControllers();
+builder.Services.AddScoped<AppState>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -23,6 +26,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.MapControllers();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,0 +1,124 @@
+﻿@rendermode InteractiveServer
+
+<PageTitle>View Detail</PageTitle>
+
+<div class="col-span-9 h-full p-8 dark:bg-gray-800 bg-white">
+	<div class="flex flex-col gap-4">
+		<div class="text-center text-3xl font-semibold">@diary.Title</div>
+		<div>
+			@((MarkupString)diary.Content)
+		</div>
+		<div>
+			<LumexButton StartContent="@favoriteIcon" Class="@(isLiked ? "text-red-500" : "text-gray-500")" OnClick="HandleLike">Thích (@diary.Likes.Count)</LumexButton>
+			<div class="my-3 text-lg font-semibold">Nhận xét (@diary.Comments.Count)</div>
+			<div class="flex flex-col gap-3 max-h-56 my-3 overflow-y-auto">
+				@foreach (Comment cmt in comments)
+				{
+					<div class="flex gap-2">
+						<div class="rounded-full bg-red-500 w-10 h-10">
+							<img src="./images/user-image.jpg" alt="User Avatar" />
+						</div>
+						<div class="flex flex-col">
+							<div class="font-semibold">@cmt.User.Username</div>
+							<p class="text-sm">@cmt.Content</p>
+						</div>
+					</div>
+				}
+			</div>
+			<LumexTextbox @bind-Value="currentCmt" @onkeydown="HandleKeyDown" Variant="InputVariant.Flat" Type="@InputType.Text" Placeholder="Nhập bình luận của bạn..." />
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter] public string id { get; set; }
+
+	private RenderFragment favoriteIcon =>@<i class="fa-solid fa-heart"></i>;
+	DiaryContext context = new DiaryContext();
+
+	private Diary diary;
+	private List<Comment> comments;
+	private string currentCmt;
+
+	private string currentUserId;
+	private bool isLiked;
+
+	protected async override void OnInitialized()
+	{
+		if (!string.IsNullOrEmpty(id))
+		{
+			diary = context.Diaries
+			.Include(d => d.Tags)
+			.Include(d => d.Likes)
+			.Include(d => d.Comments)
+			.FirstOrDefault(d => d.Id == id);
+			if (diary != null)
+			{
+				comments = context.Comments
+				.Include(c => c.User)
+				.Where(c => c.DiaryId == id)
+				.ToList();
+			}
+		}
+		else
+		{
+			diary = new Diary();
+		}
+
+		if (AppState.CurrentUser == null)
+		{
+			currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
+			User user = context.Users.Include(u => u.Likes).FirstOrDefault(u => u.Id == currentUserId);
+			if (user == null)
+			{
+				user = new User();
+				Random random = new Random();
+				user.Id = currentUserId;
+				user.Username = "user" + random.Next(100000, 1000000);
+				context.Users.Add(user);
+				context.SaveChanges();
+			}
+			AppState.CurrentUser = user;
+			isLiked = AppState.CurrentUser.Likes.Any(item => item.DiaryId == id);
+		}
+	}
+
+	private async void HandleKeyDown(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			JS.InvokeVoidAsync("console.log", AppState.CurrentUser?.Username);
+		}
+	}
+
+	private void HandleLike()
+	{
+		if (isLiked)
+		{
+			var like = AppState.CurrentUser.Likes.FirstOrDefault(item => item.DiaryId == id);
+			if (like != null)
+			{
+				context.Likes.Remove(like);
+				AppState.CurrentUser.Likes.Remove(like);
+				context.SaveChanges();
+			}
+			isLiked = false;
+		}else
+		{
+			Guid guid = Guid.NewGuid();
+			string newLikeId = guid.ToString();
+			var newLike = new Like
+			{
+				Id = newLikeId,
+				UserId = AppState.CurrentUser.Id,
+				DiaryId = id,
+			};
+
+			context.Likes.Add(newLike);
+			AppState.CurrentUser.Likes.Add(newLike); 
+			context.SaveChanges();
+			isLiked = true;
+		}
+	}
+
+}

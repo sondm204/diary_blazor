@@ -1,4 +1,6 @@
-﻿
+﻿@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
 <div class="col-span-9 h-full p-8 dark:bg-gray-800 bg-white">
 	<div class="flex flex-col gap-2 justify-center items-center">
 		<h1 class="text-3xl font-bold">Nhật ký bản thân</h1>
@@ -10,7 +12,7 @@
 		@* card *@
 		@foreach (var diary in diaries)
 		{
-			<LumexCard Shadow="Shadow.Large" Class="hover:translate-y-[-5px] hover:shadow-2xl !transition-all duration-300 cursor-pointer">
+			<LumexCard @onclick="() => NavigateToDetail(diary.Id)" Shadow="Shadow.Large" Class="hover:translate-y-[-5px] hover:shadow-2xl !transition-all duration-300 cursor-pointer">
 				<LumexCardHeader Class="p-0 h-64 w-full">
 					<img class="w-full" src="https://media.istockphoto.com/id/1457889029/photo/group-of-food-with-high-content-of-dietary-fiber-arranged-side-by-side.jpg?s=612x612&w=0&k=20&c=SEyObHsbBsrd1XZlgEg389VT86BMFKZKfKReKyVPAk4=" alt="@diary.Title" />
 				</LumexCardHeader>
@@ -39,6 +41,7 @@
 	List<Diary> diaries = new List<Diary>();
 	protected override void OnInitialized()
 	{
+		base.OnInitialized();
 		getDiaries();
 	}
 
@@ -46,5 +49,10 @@
 	{
 		// Load diaries from the database
 		diaries = context.Diaries.OrderByDescending(d => d.CreatedAt).ToList();
+	}
+
+	private void NavigateToDetail(string id)
+	{
+		Navigation.NavigateTo($"view/{id}");
 	}
 }
