@@ -17,9 +17,11 @@
 					<img class="w-full" src="https://media.istockphoto.com/id/1457889029/photo/group-of-food-with-high-content-of-dietary-fiber-arranged-side-by-side.jpg?s=612x612&w=0&k=20&c=SEyObHsbBsrd1XZlgEg389VT86BMFKZKfKReKyVPAk4=" alt="@diary.Title" />
 				</LumexCardHeader>
 				<LumexCardBody>
+					<div class="text-center font-bold text-2xl">@diary.Title</div>
 					<p class="text-gray-500 line-clamp-3">
 						@diary.Content
 					</p>
+					<div class="text-end text-sm text-gray-500">@diary.PublicedAt?.ToString("dd/MM/yyyy")</div>
 				</LumexCardBody>
 				<LumexDivider />
 				<LumexCardFooter Class="flex justify-evenly items-center py-3">
@@ -85,8 +87,8 @@
 		diaries = context.Diaries
 		.Include(d => d.Likes)
 		.Include(d => d.Comments)
-		.Where(d => d.IsActive == 1)
-		.OrderByDescending(d => d.CreatedAt).ToList();
+		.Where(d => d.IsActive == 1 && d.IsPublic == 1)
+		.OrderByDescending(d => d.PublicedAt).ToList();
 	}
 
 	private void NavigateToDetail(string id)

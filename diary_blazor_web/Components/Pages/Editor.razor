@@ -167,9 +167,18 @@
 
 	private void HandleSubmit()
 	{
-		JS.InvokeVoidAsync("console.log", diary.Content);
 		diary.Tags = selectedTags;
 		diary.UpdatedAt = DateTime.Now;
+		if(!IsPublic)
+		{
+			diary.PublicedAt = null;
+		}else
+		{
+			if(diary.PublicedAt == null)
+			{
+				diary.PublicedAt = DateTime.Now;
+			}
+		}
 		context.SaveChanges();
 	}
 
@@ -179,6 +188,18 @@
 		Guid newId = Guid.NewGuid();
 		diary.Id = newId.ToString();
 		diary.Tags = selectedTags;
+		diary.UpdatedAt = DateTime.Now;
+		if (!IsPublic)
+		{
+			diary.PublicedAt = null;
+		}
+		else
+		{
+			if (diary.PublicedAt == null)
+			{
+				diary.PublicedAt = DateTime.Now;
+			}
+		}
 		context.Diaries.Add(diary);
 		try
 		{

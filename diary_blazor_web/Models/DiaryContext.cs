@@ -61,7 +61,8 @@ public partial class DiaryContext : DbContext
 
             entity.HasOne(d => d.Diary).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.DiaryId)
-                .HasConstraintName("FK__comments__diary___66603565");
+                .HasConstraintName("FK__comments__diary___66603565")
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.User).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
@@ -164,7 +165,8 @@ public partial class DiaryContext : DbContext
 
             entity.HasOne(d => d.Diary).WithMany(p => p.Likes)
                 .HasForeignKey(d => d.DiaryId)
-                .HasConstraintName("FK__likes__diary_id__6B24EA82");
+                .HasConstraintName("FK__likes__diary_id__6B24EA82")
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.User).WithMany(p => p.Likes)
                 .HasForeignKey(d => d.UserId)

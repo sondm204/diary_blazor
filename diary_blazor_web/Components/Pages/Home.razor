@@ -43,10 +43,10 @@
 			<LumexSelect TValue="string"
 						 Label=""
 						 Class="w-52"
-						 Value="@(_selectedFilter)">
+						 @bind-Value="@(_selectedFilter)">
 				@foreach (var filter in _filter)
 				{
-					<LumexSelectItem @key=@filter Value="@filter.Key" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
+					<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
 				}
 
 			</LumexSelect>
@@ -55,22 +55,19 @@
 		<div class="flex flex-col gap-4">
 			@foreach (var diary in diaries)
 			{
-				<DiaryItem Title="@diary.Title"
-						   Diary="@diary"
-						   OnClick="() => NavigationToEditor(diary.Id)" />
+				<DiaryItem Diary="@diary"
+						   OnClick="() => NavigationToEditor(diary.Id)"
+						   OnHandlePublish="() => HandlePublish(diary.Id)"
+						   OnHandleTrash="() => HandleTrash(diary.Id)"
+						   OnHandleDelete="() => HandleDelete(diary.Id)" />
 			}
 		</div>
 	</div>
 </div>
 
 @code {
-	private Dictionary<string, string> _filter = new()
-	{
-		["all"] = "Tất cả",
-		["publish"] = "Đã công bố",
-		["draft"] = "Bài đăng nháp",
-		["trash"] = "Thùng rác"
-	};
+	private List<Diary> allDiaries = new List<Diary>();
+	private Dictionary<string, string> _filter;
 	private string _selectedFilter = "all";
 
 
@@ -78,19 +75,98 @@
 	List<Diary> diaries = new List<Diary>();
 	protected override void OnInitialized()
 	{
+		ResetStatus();
+	}
+
+	private void ResetStatus()
+	{
 		getDiaries();
+		resetFilter();
+		HandleFilter();
 	}
 
 	protected void getDiaries()
 	{
 		// Load diaries from the database
-		diaries = context.Diaries
-		.Where(d => d.IsActive == 1)
+		allDiaries = context.Diaries
 		.Include(d => d.Tags)
 		.Include(d => d.Likes)
 		.Include(d => d.Comments)
 		.OrderByDescending(d => d.UpdatedAt)
 		.ToList();
+		// diaries = allDiaries.Where(d => d.IsActive == 1).ToList();
+	}
+
+	private void resetFilter()
+	{
+		_filter = new()
+		{
+			["all"] = $"Tất cả ({allDiaries.Count})",
+			["publish"] = $"Đã xuất bản ({allDiaries.Where(d => d.IsPublic == 1).ToList().Count})",
+			["draft"] = $"Chưa xuất bản ({allDiaries.Where(d => d.IsPublic == 0).ToList().Count})",
+			["trash"] = $"Thùng rác ({allDiaries.Where(d => d.IsActive == 0).ToList().Count})"
+		};
+	}
+
+	private void HandleFilter()
+	{
+		switch (_selectedFilter)
+		{
+			case "publish":
+				diaries = allDiaries.Where(d => d.IsPublic == 1).ToList();
+				break;
+			case "draft":
+				diaries = allDiaries.Where(d => d.IsPublic == 0).ToList();
+				break;
+			case "trash":
+				diaries = allDiaries.Where(d => d.IsActive == 0).ToList();
+				break;
+			default:
+				diaries = allDiaries.Where(d => d.IsActive == 1).ToList();
+				break;
+		}
+	}
+
+	private void HandlePublish(string id)
+	{
+		Diary diary = allDiaries.FirstOrDefault(d => d.Id == id);
+		if (diary.IsPublic == 1)
+		{
+			diary.IsPublic = 0;
+			diary.PublicedAt = null;
+		}
+		else
+		{
+			diary.IsPublic = 1;
+			diary.PublicedAt = DateTime.Now;
+		}
+		context.SaveChanges();
+		ResetStatus();
+	}
+
+	private void HandleTrash(string id)
+	{
+		Diary diary = allDiaries.FirstOrDefault(d => d.Id == id);
+		if (diary.IsActive == 1)
+		{
+			diary.IsActive = 0;
+			diary.IsPublic = 0;
+			diary.PublicedAt = null;
+		}
+		else
+		{
+			diary.IsActive = 1;
+		}
+		context.SaveChanges();
+		ResetStatus();
+	}
+
+	private void HandleDelete(string id)
+	{
+		Diary diary = allDiaries.FirstOrDefault(d => d.Id == id);
+		context.Diaries.Remove(diary);
+		context.SaveChanges();
+		ResetStatus();
 	}
 
 	private void NavigationToEditor(string? id)
