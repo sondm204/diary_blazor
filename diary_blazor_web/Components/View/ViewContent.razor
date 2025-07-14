@@ -23,9 +23,9 @@
 				</LumexCardBody>
 				<LumexDivider />
 				<LumexCardFooter Class="flex justify-evenly items-center py-3">
-					<LumexButton StartContent="@favoriteIcon">Thích</LumexButton>
-					<LumexButton StartContent="@commentIcon">Bình luận</LumexButton>
-					<LumexButton StartContent="@shareIcon">Chia sẻ</LumexButton>
+					<LumexButton StartContent="@favoriteIcon" Class="@(AppState?.CurrentUser?.Likes?.Any(l => l.DiaryId == diary.Id) == true ? "text-red-500" : "text-gray-500")">Thích @diary.Likes.Count</LumexButton>
+					<LumexButton StartContent="@commentIcon" Class="text-gray-500">Bình luận @diary.Comments.Count</LumexButton>
+					<LumexButton StartContent="@shareIcon" Class="text-gray-500">Chia sẻ</LumexButton>
 				</LumexCardFooter>
 			</LumexCard>
 		}
@@ -45,10 +45,48 @@
 		getDiaries();
 	}
 
+	private bool _isInitialized = false;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender && !_isInitialized)
+		{
+			_isInitialized = true;
+
+			// Gọi JS sau khi đã render
+			string currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
+
+			if (currentUserId != null)
+			{
+				var user = context.Users
+					.Include(u => u.Likes)
+					.FirstOrDefault(u => u.Id == currentUserId);
+
+				if (user == null)
+				{
+					user = new User
+					{
+						Id = currentUserId,
+						Username = "user" + new Random().Next(100000, 1000000)
+					};
+
+					context.Users.Add(user);
+					context.SaveChanges();
+				}
+
+				AppState.CurrentUser = user;
+			}
+			StateHasChanged();
+		}
+	}
+
 	protected void getDiaries()
 	{
 		// Load diaries from the database
-		diaries = context.Diaries.OrderByDescending(d => d.CreatedAt).ToList();
+		diaries = context.Diaries
+		.Include(d => d.Likes)
+		.Include(d => d.Comments)
+		.Where(d => d.IsActive == 1)
+		.OrderByDescending(d => d.CreatedAt).ToList();
 	}
 
 	private void NavigateToDetail(string id)

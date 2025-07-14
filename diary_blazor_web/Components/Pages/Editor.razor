@@ -169,6 +169,7 @@
 	{
 		JS.InvokeVoidAsync("console.log", diary.Content);
 		diary.Tags = selectedTags;
+		diary.UpdatedAt = DateTime.Now;
 		context.SaveChanges();
 	}
 

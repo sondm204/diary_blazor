@@ -40,19 +40,13 @@
 	@* content *@
 	<div class="w-full bg-white p-8 flex flex-col gap-2 dark:bg-gray-800 dark:text-white">
 		<div class="flex items-center justify-between">
-			@* <select id="countries" class="w-50 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-				<option selected>Tất cả</option>
-				<option value="publish">Đã công bố</option>
-				<option value="draft">Bài đăng nháp</option>
-				<option value="trash">Thùng rác</option>
-			</select> *@
 			<LumexSelect TValue="string"
 						 Label=""
 						 Class="w-52"
 						 Value="@(_selectedFilter)">
 				@foreach (var filter in _filter)
 				{
-					<LumexSelectItem @key=@filter Value="@filter.Key" TextValue="@filter.Value" >@filter.Value</LumexSelectItem>
+					<LumexSelectItem @key=@filter Value="@filter.Key" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
 				}
 
 			</LumexSelect>
@@ -62,6 +56,7 @@
 			@foreach (var diary in diaries)
 			{
 				<DiaryItem Title="@diary.Title"
+						   Diary="@diary"
 						   OnClick="() => NavigationToEditor(diary.Id)" />
 			}
 		</div>
@@ -89,7 +84,13 @@
 	protected void getDiaries()
 	{
 		// Load diaries from the database
-		diaries = context.Diaries.OrderByDescending(d => d.CreatedAt).ToList();
+		diaries = context.Diaries
+		.Where(d => d.IsActive == 1)
+		.Include(d => d.Tags)
+		.Include(d => d.Likes)
+		.Include(d => d.Comments)
+		.OrderByDescending(d => d.UpdatedAt)
+		.ToList();
 	}
 
 	private void NavigationToEditor(string? id)

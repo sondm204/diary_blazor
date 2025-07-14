@@ -13,7 +13,7 @@
 			@((MarkupString)diary.Content)
 		</div>
 		<div>
-			<LumexButton StartContent="@favoriteIcon" Class="@(isLiked ? "text-red-500" : "text-gray-500")" OnClick="HandleLike">@isLiked Thích (@diary.Likes.Count)</LumexButton>
+			<LumexButton StartContent="@favoriteIcon" Class="@(isLiked ? "text-red-500" : "text-gray-500")" OnClick="HandleLike">Thích (@diary.Likes.Count)</LumexButton>
 			<div class="my-3 text-lg font-semibold">Nhận xét (@comments.Count)</div>
 			<div id="comment-list" class="flex flex-col gap-3 max-h-56 my-3 overflow-y-auto">
 				@foreach (Comment cmt in comments)

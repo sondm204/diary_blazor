@@ -4,7 +4,20 @@
 			<img class="w-20 h-20 rounded-lg" src="https://mediawinwin.vn/upload/images/sanpham/bao-gia-chup-mon-an-dich-vu-chup-anh-do-an-chuyen-nghiep-5.JPG" alt="Alternate Text" />
 			<div class="flex flex-col gap-2">
 				<h1 class="font-bold text-lg">@Title</h1>
-				<div class="text-gray-400 text-sm">Đã xuất bản 12/06/2025</div>
+				@if (Diary.PublicedAt == null)
+				{
+					<div class="text-gray-400 text-sm">Chưa xuất bản</div>
+				}
+				else
+				{
+					<div class="text-gray-400 text-sm">Đã xuất bản @Diary.PublicedAt?.ToString("dd/MM/yyyy")</div>
+				}
+				<div class="flex gap-2">
+				@foreach(Tag tag in Diary.Tags)
+				{
+					<div class="rounded-full px-2 bg-gray-300 text-xs">#@tag.Name</div>
+				}
+				</div>
 			</div>
 		</div>
 		<div class="flex flex-col gap-4 items-end justify-center">
@@ -33,6 +46,9 @@
 @code {
 	[Parameter]
 	public string Title { get; set; } = "Default Title";
+
+	[Parameter]
+	public Diary Diary { get; set; }
 
 	[Parameter]
 	public EventCallback OnClick { get; set; }
