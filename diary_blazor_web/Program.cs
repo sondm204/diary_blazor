@@ -1,5 +1,6 @@
 using diary_blazor_web;
 using diary_blazor_web.Components;
+using diary_blazor_web.Services;
 using LumexUI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLumexServices();
 builder.Services.AddControllers();
 builder.Services.AddScoped<AppState>();
+builder.Services.AddScoped<ToastService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

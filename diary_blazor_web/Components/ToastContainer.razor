@@ -1,0 +1,159 @@
+﻿@implements IDisposable
+@rendermode InteractiveServer
+
+<div class="toast-container">
+    @foreach (var toast in ToastService.Toasts.Where(t => t.IsVisible))
+    {
+        <div class="toast toast-@toast.Type.ToString().ToLower() @(toast.IsVisible ? "show" : "")"
+             role="alert">
+            <div class="toast-header">
+                <span class="toast-icon">@GetIcon(toast.Type)</span>
+                <strong class="toast-title">@GetTitle(toast.Type)</strong>
+                <button type="button" class="toast-close" @onclick="() => RemoveToast(toast.Id)">
+                    ×
+                </button>
+            </div>
+            <div class="toast-body">
+                @toast.Message
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ToastService.OnToastsChanged += async () => await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RemoveToast(string id)
+    {
+        await ToastService.RemoveToast(id);
+    }
+
+    private string GetIcon(ToastType type) => type switch
+    {
+        ToastType.Success => "✓",
+        ToastType.Error => "✗",
+        ToastType.Warning => "⚠",
+        ToastType.Info => "ℹ",
+        _ => "ℹ"
+    };
+
+    private string GetTitle(ToastType type) => type switch
+    {
+        ToastType.Success => "Success",
+        ToastType.Error => "Error",
+        ToastType.Warning => "Warning",
+        ToastType.Info => "Info",
+        _ => "Info"
+    };
+
+    public void Dispose()
+    {
+        ToastService.OnToastsChanged -= async () => await InvokeAsync(StateHasChanged);
+    }
+}
+
+<style>
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 50%;
+        z-index: 1050;
+        min-width: 350px;
+        transform: translateX(50%);
+    }
+
+    .toast {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+    .toast-header {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: rgba(0, 0, 0, 0.03);
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .toast-icon {
+        margin-right: 8px;
+        font-size: 16px;
+    }
+
+    .toast-title {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .toast-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+        }
+
+    .toast-body {
+        padding: 12px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .toast-success {
+        border-left: 4px solid #28a745;
+    }
+
+        .toast-success .toast-icon {
+            color: #28a745;
+        }
+
+    .toast-error {
+        border-left: 4px solid #dc3545;
+    }
+
+        .toast-error .toast-icon {
+            color: #dc3545;
+        }
+
+    .toast-warning {
+        border-left: 4px solid #ffc107;
+    }
+
+        .toast-warning .toast-icon {
+            color: #ffc107;
+        }
+
+    .toast-info {
+        border-left: 4px solid #17a2b8;
+    }
+
+        .toast-info .toast-icon {
+            color: #17a2b8;
+        }
+</style>

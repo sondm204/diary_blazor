@@ -127,24 +127,26 @@
 		}
 	}
 
-	private void HandlePublish(string id)
+	private async void HandlePublish(string id)
 	{
 		Diary diary = allDiaries.FirstOrDefault(d => d.Id == id);
 		if (diary.IsPublic == 1)
 		{
 			diary.IsPublic = 0;
 			diary.PublicedAt = null;
+			await ToastService.ShowSuccess("Chuyển đổi trạng thái thành \"Chưa xuất bản\"!");
 		}
 		else
 		{
 			diary.IsPublic = 1;
 			diary.PublicedAt = DateTime.Now;
+			await ToastService.ShowSuccess("Chuyển đổi trạng thái thành \"Xuất bản\"!");
 		}
 		context.SaveChanges();
 		ResetStatus();
 	}
 
-	private void HandleTrash(string id)
+	private async void HandleTrash(string id)
 	{
 		Diary diary = allDiaries.FirstOrDefault(d => d.Id == id);
 		if (diary.IsActive == 1)
@@ -152,21 +154,35 @@
 			diary.IsActive = 0;
 			diary.IsPublic = 0;
 			diary.PublicedAt = null;
+			await ToastService.ShowSuccess("Chuyển nhật ký vào thùng rác!");
 		}
 		else
 		{
 			diary.IsActive = 1;
+			await ToastService.ShowSuccess("Phục hồi nhật ký thành công!");
 		}
 		context.SaveChanges();
 		ResetStatus();
 	}
 
-	private void HandleDelete(string id)
+	private async void HandleDelete(string id)
 	{
 		Diary diary = allDiaries.FirstOrDefault(d => d.Id == id);
 		context.Diaries.Remove(diary);
-		context.SaveChanges();
-		ResetStatus();
+		try
+		{
+			context.SaveChanges();
+			await ToastService.ShowSuccess("Xóa nhật ký thành công!");
+
+		}
+		catch (Exception e)
+		{
+			await ToastService.ShowError("Không thể xóa nhật ký!");
+		}
+		finally
+		{
+			ResetStatus();
+		}
 	}
 
 	private void NavigationToEditor(string? id)
