@@ -165,24 +165,34 @@
 		else HandleSubmit();
 	}
 
-	private void HandleSubmit()
+	private async void HandleSubmit()
 	{
 		diary.Tags = selectedTags;
 		diary.UpdatedAt = DateTime.Now;
 		if(!IsPublic)
 		{
 			diary.PublicedAt = null;
+			diary.IsPublic = 0;
 		}else
 		{
+			diary.IsPublic = 1;
 			if(diary.PublicedAt == null)
 			{
 				diary.PublicedAt = DateTime.Now;
 			}
 		}
+		if(AllowComments)
+		{
+			diary.AllowComments = 1;
+		}else
+		{
+			diary.AllowComments = 0;
+		}
 		context.SaveChanges();
+		await ToastService.ShowSuccess("Cập nhật thành công!");
 	}
 
-	private void HandleCreate()  
+	private async void HandleCreate()  
 	{  
 		JS.InvokeVoidAsync("console.log", "create: " + diary.Content);  
 		Guid newId = Guid.NewGuid();
@@ -200,6 +210,14 @@
 				diary.PublicedAt = DateTime.Now;
 			}
 		}
+		if (AllowComments)
+		{
+			diary.AllowComments = 1;
+		}
+		else
+		{
+			diary.AllowComments = 0;
+		}
 		context.Diaries.Add(diary);
 		try
 		{
@@ -212,6 +230,7 @@
 		{
 			NavigationManager.NavigateTo($"/editor/{newId}");
 		}
+		await ToastService.ShowSuccess("Tạo nhật ký thành công!");
 	}
 }
 
