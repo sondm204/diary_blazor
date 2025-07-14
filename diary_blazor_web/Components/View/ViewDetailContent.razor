@@ -10,8 +10,8 @@
 		</div>
 		<div>
 			<LumexButton StartContent="@favoriteIcon" Class="@(isLiked ? "text-red-500" : "text-gray-500")" OnClick="HandleLike">Thích (@diary.Likes.Count)</LumexButton>
-			<div class="my-3 text-lg font-semibold">Nhận xét (@diary.Comments.Count)</div>
-			<div class="flex flex-col gap-3 max-h-56 my-3 overflow-y-auto">
+			<div class="my-3 text-lg font-semibold">Nhận xét (@comments.Count)</div>
+			<div id="comment-list" class="flex flex-col gap-3 max-h-56 my-3 overflow-y-auto">
 				@foreach (Comment cmt in comments)
 				{
 					<div class="flex gap-2">
@@ -25,7 +25,7 @@
 					</div>
 				}
 			</div>
-			<LumexTextbox @bind-Value="currentCmt" @onkeydown="HandleKeyDown" Variant="InputVariant.Flat" Type="@InputType.Text" Placeholder="Nhập bình luận của bạn..." />
+			<LumexTextbox @bind-Value="currentCmt" @onkeyup="HandleKeyUp" Variant="InputVariant.Flat" Type="@InputType.Text" Placeholder="Nhập bình luận của bạn..." />
 		</div>
 	</div>
 </div>
@@ -57,6 +57,7 @@
 				comments = context.Comments
 				.Include(c => c.User)
 				.Where(c => c.DiaryId == id)
+				.OrderBy(c => c.CreatedAt)
 				.ToList();
 			}
 		}
@@ -80,14 +81,51 @@
 			}
 			AppState.CurrentUser = user;
 			isLiked = AppState.CurrentUser.Likes.Any(item => item.DiaryId == id);
+			await JS.InvokeVoidAsync("scrollToBottom", "comment-list");
 		}
 	}
 
-	private async void HandleKeyDown(KeyboardEventArgs e)
+	private async void HandleKeyUp(KeyboardEventArgs e)
 	{
 		if (e.Key == "Enter")
 		{
-			JS.InvokeVoidAsync("console.log", AppState.CurrentUser?.Username);
+			HandleComment();
+		}
+	}
+
+	private async void HandleComment()
+	{
+		if (currentCmt != "")
+		{
+			Guid guid = Guid.NewGuid();
+			string newCmtId = guid.ToString();
+			Comment newCmt = new Comment
+			{
+				Id = newCmtId,
+				DiaryId = id,
+				UserId = AppState.CurrentUser.Id,
+				Content = currentCmt,
+			};
+			context.Comments.Add(newCmt);
+			AppState.CurrentUser.Comments.Add(newCmt);
+			try
+			{
+				// context.SaveChanges();
+
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+			finally
+			{
+				currentCmt = "";
+			}
+			comments = context.Comments
+				.Include(c => c.User)
+				.Where(c => c.DiaryId == id)
+				.OrderBy(c => c.CreatedAt)
+				.ToList();
 		}
 	}
 
@@ -103,7 +141,8 @@
 				context.SaveChanges();
 			}
 			isLiked = false;
-		}else
+		}
+		else
 		{
 			Guid guid = Guid.NewGuid();
 			string newLikeId = guid.ToString();
@@ -115,7 +154,7 @@
 			};
 
 			context.Likes.Add(newLike);
-			AppState.CurrentUser.Likes.Add(newLike); 
+			AppState.CurrentUser.Likes.Add(newLike);
 			context.SaveChanges();
 			isLiked = true;
 		}
