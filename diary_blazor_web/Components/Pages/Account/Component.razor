@@ -1,0 +1,25 @@
+﻿@page "/signin/{username}"
+@using System.Security.Claims
+
+<h3>Đăng nhập thành công</h3>
+
+@code {
+	[CascadingParameter]
+	public HttpContext? HttpContext { get; set; }
+	[Parameter] public string? username { get; set; }
+	[Parameter] public string? password { get; set; }
+
+	protected async override Task OnInitializedAsync()
+	{
+		var claims = new List<Claim>
+		{
+			new Claim(ClaimTypes.Name, username),
+			new Claim(ClaimTypes.Role, "Admin")
+		};
+
+		var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+		var principal = new ClaimsPrincipal(identity);
+		await HttpContext.SignInAsync(principal);
+		NavigationManager.NavigateTo("/");
+	}
+}

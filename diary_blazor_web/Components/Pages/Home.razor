@@ -5,77 +5,91 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<div class="flex bg-gray-100 dark:bg-[#282135] h-full">
-	@* sidebar *@
-	<div class="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex flex-col">
-		<div class="pb-2 border-b border-gray-200 dark:border-gray-700">
-			<div @onclick="(() => NavigationToEditor(null))" class="text-center p-2 bg-yellow-200/70 rounded-full text-lg text-yellow-700 font-semibold cursor-pointer hover:scale-105 transition-all duration-200">
-				<i class="fa-solid fa-plus"></i>
-				Bài đăng mới
-			</div>
-		</div>
-		<div class="flex flex-col gap-1">
-			<div class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
-				<i class="fa-solid fa-newspaper"></i>
-				Bài đăng
-			</div>
-			<div class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
-				<i class="fa-solid fa-chart-column"></i>
-				Thống kê
-			</div>
-			<div class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
-				<i class="fa-solid fa-message"></i>
-				Nhận xét
+<AuthorizeView>
+	<Authorized>
+		<div class="flex bg-gray-100 dark:bg-[#282135] h-full">
+			@* sidebar *@
+			<div class="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex flex-col">
+				<div class="pb-2 border-b border-gray-200 dark:border-gray-700">
+					<div @onclick="(() => NavigationToEditor(null))" class="text-center p-2 bg-yellow-200/70 rounded-full text-lg text-yellow-700 font-semibold cursor-pointer hover:scale-105 transition-all duration-200">
+						<i class="fa-solid fa-plus"></i>
+						Bài đăng mới
+					</div>
+				</div>
+				<div class="flex flex-col gap-1">
+					<div class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
+						<i class="fa-solid fa-newspaper"></i>
+						Bài đăng
+					</div>
+					<div class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
+						<i class="fa-solid fa-chart-column"></i>
+						Thống kê
+					</div>
+					<div class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
+						<i class="fa-solid fa-message"></i>
+						Nhận xét
+					</div>
+
+					<div class="border-b border-b-gray-300 dark:border-b-gray-600"></div>
+
+					<a href="/view" class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
+						<i class="fa-solid fa-arrow-up-right-from-square"></i>
+						Xem nhật ký
+					</a>
+				</div>
 			</div>
 
-			<div class="border-b border-b-gray-300 dark:border-b-gray-600"></div>
+			@* content *@
+			<div class="w-full bg-white p-8 flex flex-col gap-2 dark:bg-gray-800 dark:text-white">
+				<div class="flex items-center justify-between">
+					<LumexSelect TValue="string"
+								 Label=""
+								 Class="w-52"
+								 @bind-Value="@(_selectedFilter)">
+						@foreach (var filter in _filter)
+						{
+							<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
+						}
 
-			<a href="/view" class="flex gap-2 items-center rounded-lg p-3 cursor-pointer hover:bg-gray-200 dark:text-white hover:dark:bg-gray-600">
-				<i class="fa-solid fa-arrow-up-right-from-square"></i>
-				Xem nhật ký
-			</a>
+					</LumexSelect>
+					<div>Quản lý</div>
+				</div>
+				<div class="flex flex-col gap-4">
+					@foreach (var diary in diaries)
+					{
+						<DiaryItem Diary="@diary"
+								   OnClick="() => NavigationToEditor(diary.Id)"
+								   OnHandlePublish="() => HandlePublish(diary.Id)"
+								   OnHandleTrash="() => HandleTrash(diary.Id)"
+								   OnHandleDelete="() => HandleDelete(diary.Id)" />
+					}
+				</div>
+			</div>
 		</div>
-	</div>
-
-	@* content *@
-	<div class="w-full bg-white p-8 flex flex-col gap-2 dark:bg-gray-800 dark:text-white">
-		<div class="flex items-center justify-between">
-			<LumexSelect TValue="string"
-						 Label=""
-						 Class="w-52"
-						 @bind-Value="@(_selectedFilter)">
-				@foreach (var filter in _filter)
-				{
-					<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
-				}
-
-			</LumexSelect>
-			<div>Quản lý</div>
-		</div>
-		<div class="flex flex-col gap-4">
-			@foreach (var diary in diaries)
-			{
-				<DiaryItem Diary="@diary"
-						   OnClick="() => NavigationToEditor(diary.Id)"
-						   OnHandlePublish="() => HandlePublish(diary.Id)"
-						   OnHandleTrash="() => HandleTrash(diary.Id)"
-						   OnHandleDelete="() => HandleDelete(diary.Id)" />
-			}
-		</div>
-	</div>
-</div>
+	</Authorized>
+	<NotAuthorized>
+		
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationStateTask{ get; set; }
 	private List<Diary> allDiaries = new List<Diary>();
 	private Dictionary<string, string> _filter;
 	private string _selectedFilter = "all";
 
 
-	DiaryContext context = new DiaryContext();
+	// DiaryContext context = new DiaryContext();
 	List<Diary> diaries = new List<Diary>();
-	protected override void OnInitialized()
+	protected override async void OnInitialized()
 	{
 		ResetStatus();
+		var authenticationState = await authenticationStateTask;
+		if(!authenticationState.User.Identity.IsAuthenticated)
+		{
+			NavigationManager.NavigateTo("/login");		
+		}
 	}
 
 	private void ResetStatus()
