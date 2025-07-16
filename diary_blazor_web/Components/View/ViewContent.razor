@@ -10,7 +10,11 @@
 	</div>
 	<div class="flex flex-col gap-4 mt-4">
 		@* card *@
-		@foreach (var diary in diaries)
+		@if (Diaries.Count == 0)
+		{
+			<div class="text-2xl font-bold text-center mt-20">Không có nhật ký nào</div>
+		}
+		@foreach (var diary in Diaries)
 		{
 			<LumexCard @onclick="() => NavigateToDetail(diary.Id)" Shadow="Shadow.Large" Class="hover:translate-y-[-5px] hover:shadow-2xl !transition-all duration-300 cursor-pointer">
 				<LumexCardHeader Class="p-0 h-64 w-full">
@@ -21,7 +25,15 @@
 					<p class="text-gray-500 line-clamp-3">
 						@diary.Content
 					</p>
-					<div class="text-end text-sm text-gray-500">@diary.PublicedAt?.ToString("dd/MM/yyyy")</div>
+					<div class="flex justify-between items-center mt-3">
+						<div class="flex gap-2 items-center">
+							@foreach (Tag tag in diary.Tags)
+							{
+								<div class="px-3 py-1 rounded-full bg-gray-300 text-xs font-semibold"><i class="fa-solid fa-tags"></i> @tag.Name</div>
+							}
+						</div>
+						<div class="text-end text-sm text-gray-500">@diary.PublicedAt?.ToString("dd/MM/yyyy")</div>
+					</div>
 				</LumexCardBody>
 				<LumexDivider />
 				<LumexCardFooter Class="flex justify-evenly items-center py-3">
@@ -40,11 +52,12 @@
 	private RenderFragment shareIcon =>@<i class="fa-solid fa-share"></i>;
 
 	DiaryContext context = new DiaryContext();
-	List<Diary> diaries = new List<Diary>();
+	// List<Diary> Diaries = new List<Diary>();
+	[Parameter] public List<Diary> Diaries { get; set; }
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		getDiaries();
+		// getDiaries();
 	}
 
 	private bool _isInitialized = false;
@@ -83,8 +96,8 @@
 
 	protected void getDiaries()
 	{
-		// Load diaries from the database
-		diaries = context.Diaries
+		// Load Diaries from the database
+		Diaries = context.Diaries
 		.Include(d => d.Likes)
 		.Include(d => d.Comments)
 		.Where(d => d.IsActive == 1 && d.IsPublic == 1)

@@ -4,21 +4,23 @@
 <PageTitle>View</PageTitle>
 
 <div class="grid grid-cols-12 dark:bg-[#282135] bg-gray-100 h-full">
-	<ViewContent />
-	<ViewSidebar />
+	<ViewContent Diaries="@diaries" />
+	<ViewSidebar OnHandleFilterTag="@(tagId => HandleFilterTag(tagId))" />
 </div>
 
 @code {
 	private string currentUserId;
 	private DiaryContext context = new DiaryContext();
+	private List<Diary> allDiaries = new List<Diary>();
+	private List<Diary> diaries = new List<Diary>();
 
 	protected async override void OnInitialized()
 	{
-		if(AppState.CurrentUser == null)
+		if (AppState.CurrentUser == null)
 		{
 			currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
 			User user = context.Users.Find(currentUserId);
-			if(user == null)
+			if (user == null)
 			{
 				user = new User();
 				Random random = new Random();
@@ -28,6 +30,32 @@
 				context.SaveChanges();
 			}
 			AppState.CurrentUser = user;
+		}
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		allDiaries = context.Diaries
+		.Include(d => d.Likes)
+		.Include(d => d.Comments)
+		.Include(d => d.Tags)
+		.Where(d => d.IsActive == 1 && d.IsPublic == 1)
+		.OrderByDescending(d => d.PublicedAt).ToList();
+		diaries = allDiaries;
+	}
+
+	private void HandleFilterTag(object? tagId)
+	{
+		if (tagId == null)
+		{
+			diaries = allDiaries;
+		}
+		else
+		{
+
+			diaries = allDiaries
+			.Where(d => d.Tags.Any(t => t.Id == tagId.ToString()))
+			.ToList();
 		}
 	}
 }

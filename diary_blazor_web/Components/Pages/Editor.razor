@@ -37,9 +37,9 @@
 									@foreach (Tag tag in selectedTags)
 									{
 										<div class="text-xs p-1 bg-gray-300 rounded-full">
-											#@tag.Name
-
-											<span @onclick="() => selectedTags.Remove(tag)" class="cursor-pointer"><i class="fa-solid fa-xmark"></i></span>
+											<i class="fa-solid fa-tags"></i>
+											@tag.Name
+											<span @onclick="() => selectedTags.Remove(tag)" class="cursor-pointer hover:scale-105"><i class="fa-solid fa-xmark"></i></span>
 										</div>
 									}
 								</div>
