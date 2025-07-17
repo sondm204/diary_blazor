@@ -790,6 +790,10 @@ video {
   margin-top: 1rem;
 }
 
+.mt-40{
+  margin-top: 10rem;
+}
+
 .line-clamp-3{
   overflow: hidden;
   display: -webkit-box;
@@ -2020,6 +2024,10 @@ video {
   font-weight: 600;
 }
 
+.capitalize{
+  text-transform: capitalize;
+}
+
 .leading-medium{
   line-height: var(--lumex-line-height-medium);
 }
@@ -2249,11 +2257,6 @@ video {
 .text-yellow-700{
   --tw-text-opacity: 1;
   color: rgb(161 98 7 / var(--tw-text-opacity, 1));
-}
-
-.text-diary-pink{
-  --tw-text-opacity: 1;
-  color: rgb(236 72 153 / var(--tw-text-opacity, 1));
 }
 
 .underline{

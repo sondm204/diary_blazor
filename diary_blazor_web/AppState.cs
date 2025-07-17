@@ -6,6 +6,7 @@ namespace diary_blazor_web
     {
         public string ShareData { get; set; }
         public User CurrentUser { get; set; }
+        public string CurrentViewId { get; set; }
 
         public event Action? OnChange;
 

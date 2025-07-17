@@ -11,6 +11,7 @@
 		await base.OnParametersSetAsync();
 		if(HttpContext.User.Identity.IsAuthenticated)
 		{
+			AppState.SetCurrentUser(null);
 			await HttpContext.SignOutAsync();
 			NavigationManager.NavigateTo("/login", true);
 		}

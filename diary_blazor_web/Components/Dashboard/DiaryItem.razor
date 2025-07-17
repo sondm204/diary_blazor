@@ -34,7 +34,7 @@
 					}
 					<span class="cursor-pointer text-2xl text-gray-500 hover:text-blue-500"><i class="fa-solid fa-tag"></i></span>
 					<span class="cursor-pointer text-xl text-gray-500 hover:text-red-500" @onclick="OnHandleTrash" @onclick:stopPropagation><i class="fa-solid fa-trash-can"></i></span>
-					<span class="cursor-pointer text-xl text-gray-500 hover:text-blue-500" @onclick:stopPropagation><a href=@($"./view/{Diary.Id}") target="_blank"><i class="fa-solid fa-eye"></i></a></span>
+					<span class="cursor-pointer text-xl text-gray-500 hover:text-blue-500" @onclick:stopPropagation><a href=@($"./view/{UserId}/{Diary.Id}") target="_blank"><i class="fa-solid fa-eye"></i></a></span>
 				}
 				else
 				{
@@ -47,12 +47,12 @@
 			<div class="flex gap-2 items-center">
 				<span class="cursor-pointer text-2xl text-gray-500 hover:text-blue-500"><i class="fa-solid fa-share-nodes"></i></span>
 				<div class="flex items-center gap-1">
-					<span class="text-sm text-gray-500">0</span>
+					<span class="text-sm text-gray-500">@Diary.Comments.Count</span>
 					<span class="text-gray-500"><i class="fa-solid fa-message"></i></span>
 				</div>
 				<div class="flex items-center gap-1">
-					<span class="text-sm text-gray-500">0</span>
-					<span class="text-gray-500"><i class="fa-solid fa-chart-column"></i></span>
+					<span class="text-sm text-gray-500">@Diary.Likes.Count</span>
+					<span class="text-gray-500"><i class="fa-solid fa-heart"></i></span>
 				</div>
 			</div>
 		</div>
@@ -61,6 +61,8 @@
 
 @code {
 
+	[Parameter]
+	public string UserId { get; set; }
 	[Parameter]
 	public Diary Diary { get; set; }
 	[Parameter]

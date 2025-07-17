@@ -2,7 +2,7 @@
 
 <LumexThemeProvider />
 <div class='font-inter dark:text-white @(_darkMode ? "dark" : "")'>
-	<NavMenu OnDarkModeToggled="@HandleDarkModeToggled" />
+	<NavMenu />
 	<div class="h-screen">
 		@Body
 	</div>
@@ -20,11 +20,5 @@
 
 	protected override void OnInitialized()
 	{
-		AppState.OnChange += StateHasChanged;
-	}
-
-	public void Dispose()
-	{
-		AppState.OnChange -= StateHasChanged;
 	}
 }

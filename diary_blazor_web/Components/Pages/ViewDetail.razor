@@ -1,10 +1,12 @@
-﻿@page "/view/{id}"
+﻿@page "/view/{userId}/{id}"
 
+<PageTitle>Diary - Chi tiết</PageTitle>
 <div class="grid grid-cols-12 dark:bg-[#282135] bg-gray-100 h-full">
-	<ViewDetailContent id="@id" />
-	<ViewSidebar />
+	<ViewDetailContent UserId="@userId" id="@id" />
+	<ViewSidebar UserId="@userId" />
 </div>
 
 @code {
 	[Parameter] public string id { get; set; }
+	[Parameter] public string userId { get; set; }
 }
