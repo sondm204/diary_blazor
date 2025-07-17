@@ -10,7 +10,13 @@ module.exports = {
         'C:/Users/Son Duong/.nuget/packages/lumexui/1.1.1/theme/components/*.cs'
     ],
     theme: {
-        extend: {},
+        extend: {
+            colors: {
+                'diary-purple': '#8B5CF6',
+                'diary-pink': '#EC4899',
+                'diary-blue': '#3B82F6'
+            }
+        },
         fontFamily: {
             'inter': ['Inter', 'sans-serif'],
         }

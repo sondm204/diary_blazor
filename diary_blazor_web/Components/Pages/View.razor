@@ -1,16 +1,19 @@
-﻿@page "/view"
+﻿@page "/view/{id}"
+@page "/view"
 @rendermode InteractiveServer
 
-<PageTitle>View</PageTitle>
+<PageTitle>Diary - Xem nhật ký</PageTitle>
 
 <div class="grid grid-cols-12 dark:bg-[#282135] bg-gray-100 h-full">
-	<ViewContent Diaries="@diaries" />
-	<ViewSidebar OnHandleFilterTag="@(tagId => HandleFilterTag(tagId))" />
+	<ViewContent UserId="@id" Diaries="@diaries" />
+	<ViewSidebar UserId="@id" OnHandleFilterTag="@(tagId => HandleFilterTag(tagId))" />
 </div>
 
 @code {
+	[Parameter]
+	public string? id { get; set; }
 	private string currentUserId;
-	private DiaryContext context = new DiaryContext();
+	// private DiaryContext context = new DiaryContext();
 	private List<Diary> allDiaries = new List<Diary>();
 	private List<Diary> diaries = new List<Diary>();
 
@@ -39,7 +42,8 @@
 		.Include(d => d.Likes)
 		.Include(d => d.Comments)
 		.Include(d => d.Tags)
-		.Where(d => d.IsActive == 1 && d.IsPublic == 1)
+		.Include(d => d.User)
+		.Where(d => d.UserId == id && d.IsActive == 1 && d.IsPublic == 1)
 		.OrderByDescending(d => d.PublicedAt).ToList();
 		diaries = allDiaries;
 	}

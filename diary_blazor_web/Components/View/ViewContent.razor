@@ -47,11 +47,12 @@
 </div>
 
 @code {
+	[Parameter] public string UserId { get; set; }
 	private RenderFragment favoriteIcon =>@<i class="fa-solid fa-heart"></i>;
 	private RenderFragment commentIcon =>@<i class="fa-solid fa-comment"></i>;
 	private RenderFragment shareIcon =>@<i class="fa-solid fa-share"></i>;
 
-	DiaryContext context = new DiaryContext();
+	// DiaryContext context = new DiaryContext();
 	// List<Diary> Diaries = new List<Diary>();
 	[Parameter] public List<Diary> Diaries { get; set; }
 	protected override void OnInitialized()
@@ -106,6 +107,6 @@
 
 	private void NavigateToDetail(string id)
 	{
-		Navigation.NavigateTo($"view/{id}");
+		Navigation.NavigateTo($"view/{UserId}/{id}");
 	}
 }

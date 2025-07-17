@@ -3,7 +3,7 @@
 <PageTitle>View Detail</PageTitle>
 
 <div class="col-span-9 h-full p-8 dark:bg-gray-800 bg-white">
-	<a href="../view" class="flex gap-2 items-center hover:text-blue-500 cursor-pointer">
+	<a href=@($"../view/{UserId}") class="flex gap-2 items-center hover:text-blue-500 cursor-pointer">
 		<i class="fa-regular fa-circle-left"></i>
 		Quay lại
 	</a>
@@ -29,16 +29,20 @@
 					</div>
 				}
 			</div>
-			<LumexTextbox @bind-Value="currentCmt" @onkeyup="HandleKeyUp" Variant="InputVariant.Flat" Type="@InputType.Text" Placeholder="Nhập bình luận của bạn..." />
+			@if (diary.AllowComments == 1)
+			{
+				<LumexTextbox @bind-Value="currentCmt" @onkeyup="HandleKeyUp" Variant="InputVariant.Flat" Type="@InputType.Text" Placeholder="Nhập bình luận của bạn..." />
+			}
 		</div>
 	</div>
 </div>
 
 @code {
 	[Parameter] public string id { get; set; }
+	[Parameter] public string UserId { get; set; }
 
 	private RenderFragment favoriteIcon =>@<i class="fa-solid fa-heart"></i>;
-	DiaryContext context = new DiaryContext();
+	// DiaryContext context = new DiaryContext();
 
 	private Diary diary;
 	private List<Comment> comments;

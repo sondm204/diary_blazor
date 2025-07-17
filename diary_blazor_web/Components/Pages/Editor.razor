@@ -2,7 +2,7 @@
 @page "/editor"
 @rendermode InteractiveServer
 
-<PageTitle>Editor</PageTitle>
+<PageTitle>Diary - Chỉnh sửa nhật ký</PageTitle>
 
 <div class="grid grid-cols-12 h-screen">
 	<div class="col-span-10">
@@ -87,7 +87,7 @@
 @code {
 	private Boolean isCreate = false;
 	[Parameter] public string id { get; set; }
-	DiaryContext context = new DiaryContext();
+	// DiaryContext context = new DiaryContext();
 	Diary diary = new Diary();
 	List<Tag> allTags = new List<Tag>();
 	List<Tag> filterTags = new List<Tag>();
@@ -199,6 +199,7 @@
 		diary.Id = newId.ToString();
 		diary.Tags = selectedTags;
 		diary.UpdatedAt = DateTime.Now;
+		diary.UserId = AppState.CurrentUser.Id;
 		if (!IsPublic)
 		{
 			diary.PublicedAt = null;

@@ -31,7 +31,7 @@
 				{
 					<div class="flex justify-between" @onclick="() => OnHandleFilterTag.InvokeAsync(tag.Id)">
 						<div class="px-3 py-1 rounded-full bg-gray-300 text-xs font-semibold cursor-pointer hover:scale-105"><i class="fa-solid fa-tags"></i> @tag.Name</div>
-						<div>@tag.Diaries.Count</div>
+						<div>@tag.Diaries.Where(d => d.IsPublic == 1 && d.IsActive == 1).ToList().Count</div>
 					</div>
 				}
 			</div>
@@ -41,14 +41,22 @@
 </div>
 
 @code {
-	DiaryContext context = new DiaryContext();
+	// DiaryContext context = new DiaryContext();
 	[Parameter] public EventCallback OnHandleFilterTag { get; set; }
-	List<Diary> allDiaries = new List<Diary>();
+	[Parameter] public string UserId { get; set; }
 	List<Tag> allTags = new List<Tag>();
+	List<Diary> allDiaries = new List<Diary>();
 
 	protected override void OnInitialized()
 	{
-		allDiaries = context.Diaries.ToList();
-		allTags = context.Tags.Include(t => t.Diaries).ToList();
+		allDiaries = context.Diaries
+		.Include(d => d.User)
+		.Where(d => d.User.Id == UserId && d.IsPublic == 1 && d.IsActive == 1)
+		.ToList();
+		List<string> diaryIds = allDiaries.Select(d => d.Id).ToList();
+		allTags = context.Tags
+		.Include(t => t.Diaries)
+		.Where(t => t.Diaries.Any(d => diaryIds.Contains(d.Id) && d.UserId == UserId))
+		.ToList();
 	}
 }

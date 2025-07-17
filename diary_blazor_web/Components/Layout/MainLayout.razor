@@ -2,7 +2,7 @@
 
 <LumexThemeProvider />
 <div class='font-inter dark:text-white @(_darkMode ? "dark" : "")'>
-	<NavMenu OnDarkModeToggled="@HandleDarkModeToggled" />
+	<NavMenu />
 	<div class="h-screen">
 		@Body
 	</div>
@@ -16,5 +16,9 @@
 	private void HandleDarkModeToggled(bool isDarkMode)
 	{
 		_darkMode = isDarkMode;
+	}
+
+	protected override void OnInitialized()
+	{
 	}
 }

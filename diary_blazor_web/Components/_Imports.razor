@@ -8,10 +8,12 @@
 @using Microsoft.JSInterop  
 @using diary_blazor_web  
 @using diary_blazor_web.Components  
+@using diary_blazor_web.Components.Layout
 @inject IJSRuntime JS  
 @using LumexUI  
 @using LumexUI.Common  
 @using diary_blazor_web.Models  
+@using diary_blazor_web.Models.ViewModels
 @using diary_blazor_web.Components.View  
 @using diary_blazor_web.Components.Dashboard  
 @using Microsoft.EntityFrameworkCore;
@@ -19,4 +21,7 @@
 @inject AppState AppState
 @inject IJSRuntime JSRuntime
 @inject Services.ToastService ToastService
-
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject DiaryContext context
