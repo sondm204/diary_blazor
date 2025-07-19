@@ -12,7 +12,7 @@
 					  Label="Tiêu đề"
 					  Placeholder="Nhập tiêu đề"
 					  Class="w-full" />
-		<textarea id="tiny" @bind="diary.Content" placeholder="Nhập nội dung" class="form-control h-full" style="width: 100%;"></textarea>
+		<textarea id="editor" @bind="diary.Content" placeholder="Nhập nội dung" class="form-control" style="width: 100%; height: calc(100% - 150px)"></textarea>
 	</div>
 	<div class="col-span-2">
 		<div class="">
@@ -130,6 +130,14 @@
 		isCreate = id == null;
 	}
 
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await JS.InvokeVoidAsync("initTinyMCE", "editor");
+		}
+	}
+
 	private void HandleSearchTag(string value)
 	{
 		filterTags = allTags
@@ -167,6 +175,7 @@
 
 	private async void HandleSubmit()
 	{
+		diary.Content = await JS.InvokeAsync<string>("getTinyMCEContent", "editor");
 		diary.Tags = selectedTags;
 		diary.UpdatedAt = DateTime.Now;
 		if(!IsPublic)
