@@ -68,29 +68,32 @@
 		{
 			_isInitialized = true;
 
-			// Gọi JS sau khi đã render
-			string currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
-
-			if (currentUserId != null)
+			if(AppState.CurrentUser == null)
 			{
-				var user = context.Users
-					.Include(u => u.Likes)
-					.FirstOrDefault(u => u.Id == currentUserId);
+				string currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
 
-				if (user == null)
+				if (currentUserId != null)
 				{
-					user = new User
+					var user = context.Users
+						.Include(u => u.Likes)
+						.FirstOrDefault(u => u.Id == currentUserId);
+
+					if (user == null)
 					{
-						Id = currentUserId,
-						Username = "user" + new Random().Next(100000, 1000000)
-					};
+						user = new User
+						{
+							Id = currentUserId,
+							Username = "user" + new Random().Next(100000, 1000000)
+						};
 
-					context.Users.Add(user);
-					context.SaveChanges();
+						context.Users.Add(user);
+						context.SaveChanges();
+					}
+
+					AppState.CurrentUser = user;
 				}
-
-				AppState.CurrentUser = user;
 			}
+			// Gọi JS sau khi đã render
 			StateHasChanged();
 		}
 	}

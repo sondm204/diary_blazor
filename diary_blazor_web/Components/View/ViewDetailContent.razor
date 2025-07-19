@@ -74,31 +74,6 @@
 		{
 			diary = new Diary();
 		}
-
-		// if (AppState.CurrentUser == null)
-		// {
-		// 	currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
-		// 	if (currentUserId != null)
-		// 	{
-		// 		User user = context.Users.Include(u => u.Likes).FirstOrDefault(u => u.Id == currentUserId);
-		// 		if (user == null)
-		// 		{
-		// 			user = new User();
-		// 			Random random = new Random();
-		// 			user.Id = currentUserId;
-		// 			user.Username = "user" + random.Next(100000, 1000000);
-		// 			context.Users.Add(user);
-		// 			context.SaveChanges();
-		// 		}
-		// 		AppState.CurrentUser = user;
-		// 	}
-		// 	if (AppState.CurrentUser?.Likes != null)
-		// 	{
-		// 		JS.InvokeVoidAsync("console.log", "hello");
-		// 		isLiked = AppState.CurrentUser.Likes.Any(item => item.DiaryId == id);
-		// 	}
-		// }
-		// await JS.InvokeVoidAsync("scrollToBottom", "comment-list");
 	}
 
 	private bool _isInitialized = false;
@@ -108,28 +83,32 @@
 		{
 			_isInitialized = true;
 
-			// Gọi JS sau khi đã render
-			currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
-
-			if (currentUserId != null)
+			if (AppState.CurrentUser == null)
 			{
-				var user = context.Users
-					.Include(u => u.Likes)
-					.FirstOrDefault(u => u.Id == currentUserId);
 
-				if (user == null)
+				// Gọi JS sau khi đã render
+				currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
+
+				if (currentUserId != null)
 				{
-					user = new User
+					var user = context.Users
+						.Include(u => u.Likes)
+						.FirstOrDefault(u => u.Id == currentUserId);
+
+					if (user == null)
 					{
-						Id = currentUserId,
-						Username = "user" + new Random().Next(100000, 1000000)
-					};
+						user = new User
+						{
+							Id = currentUserId,
+							Username = "user" + new Random().Next(100000, 1000000)
+						};
 
-					context.Users.Add(user);
-					context.SaveChanges();
+						context.Users.Add(user);
+						context.SaveChanges();
+					}
+
+					AppState.CurrentUser = user;
 				}
-
-				AppState.CurrentUser = user;
 			}
 
 			if (AppState.CurrentUser?.Likes != null)
