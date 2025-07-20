@@ -3,21 +3,28 @@
 <div class="col-span-3 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex flex-col gap-4">
 	<LumexCard Class="max-w-sm">
 		<LumexCardHeader Class="justify-between">
-			<div class="flex gap-2 items-start text-xl font-bold">
+			<div class="flex gap-2 items-center text-xl font-bold">
 				<i class="fa-solid fa-user"></i>
 				Giới thiệu
 			</div>
 		</LumexCardHeader>
 		<LumexCardBody>
+			<div @onclick="ViewProfile" class="flex gap-1 items-center mb-2 cursor-pointer mx-auto border py-1 px-5 rounded-lg hover:scale-105">
+				<img class="w-12 h-12 object-cover" src="/images/user-image.jpg" />
+				<div class="flex flex-col">
+					<p class="font-semibold">@user.Fullname</p>
+					<p class="text-sm text-gray-500">@user.Username</p>
+				</div>
+			</div>
 			<div class="text-sm text-gray-500">
-				Chào mừng bạn đến với không gian cá nhân của tôi, nơi tôi chia sẻ những suy nghĩ, trải nghiệm và chiêm nghiệm hàng ngày. Hãy cùng tôi trên hành trình khám phá bản thân và sống chánh niệm.
+				@user.About
 			</div>
 		</LumexCardBody>
 	</LumexCard>
 	<LumexCard Class="max-w-sm">
 		<LumexCardHeader Class="justify-between">
-			<div class="flex gap-2 items-start text-xl font-bold">
-				<i class="fa-solid fa-user"></i>
+			<div class="flex gap-2 items-center text-xl font-bold">
+				<i class="fa-solid fa-tags"></i>
 				Nhãn
 			</div>
 		</LumexCardHeader>
@@ -44,6 +51,7 @@
 	// DiaryContext context = new DiaryContext();
 	[Parameter] public EventCallback OnHandleFilterTag { get; set; }
 	[Parameter] public string UserId { get; set; }
+	private User user = new User();
 	List<Tag> allTags = new List<Tag>();
 	List<Diary> allDiaries = new List<Diary>();
 
@@ -58,5 +66,11 @@
 		.Include(t => t.Diaries)
 		.Where(t => t.UserId == UserId)
 		.ToList();
+		user = context.Users.FirstOrDefault(u => u.Id == UserId);
+	}
+
+	private void ViewProfile()
+	{
+		NavigationManager.NavigateTo($"/profile/{UserId}");
 	}
 }

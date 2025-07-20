@@ -231,6 +231,9 @@ public partial class DiaryContext : DbContext
             entity.Property(e => e.Avatar)
                .HasColumnType("text")
                .HasColumnName("avatar");
+            entity.Property(e => e.About)
+               .HasColumnType("ntext")
+               .HasColumnName("about");
             entity.Property(e => e.IsPublic)
                .HasDefaultValue((byte)0)
                .HasColumnName("is_public");
