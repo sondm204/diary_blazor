@@ -227,12 +227,13 @@
 			Fullname = fullname,
 			Username = username,
 			Email = email,
-			Password = password,
+			Password = BCrypt.HashPassword(password),
 			IsPublic = isPublic == true ? (byte)1 : (byte)0,
 			CreatedAt = DateTime.Now,
 		};
 		context.Users.Add(newUser);
 		context.SaveChanges();
+		ToastService.ShowSuccess("Tạo tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.");
 		NavigationManager.NavigateTo("/login");
 	}
 }
