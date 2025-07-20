@@ -17,6 +17,8 @@ public partial class User
 
     public string? Avatar { get; set; }
 
+    public string? About { get; set; }
+
     public byte? IsGuest { get; set; }
 
     public byte? IsPublic { get; set; }

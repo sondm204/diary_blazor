@@ -2,27 +2,29 @@
 
 
 <LumexNavbar Sticky Bordered Height="60px" Class="bg-gray-100">
-    <LumexNavbarContent Align="@Align.Start">
-        <a href=@(AppState.CurrentUser?.IsGuest == 0 ? $"/dashboard/{AppState.CurrentUser?.Id}" : $"/view/{AppState.CurrentViewId}") class="flex items-center text-lg font-bold no-underline">
-		<img src="images/logo.png" alt="Logo" width="50" />
-		<span class="text-2xl translate-y-3 -translate-x-1 text-blue-600">iary</span>
-	</a>
-    </LumexNavbarContent>
+	<LumexNavbarContent Align="@Align.Start">
+		<a href=@(AppState.CurrentUser?.IsGuest == 0 ? $"/dashboard/{AppState.CurrentUser?.Id}" : $"/view/{AppState.CurrentViewId}") class="flex items-center text-lg font-bold no-underline">
+			<img src="images/logo.png" alt="Logo" width="50" />
+			<span class="text-2xl translate-y-3 -translate-x-1 text-blue-600">iary</span>
+		</a>
+	</LumexNavbarContent>
 
-    <LumexNavbarContent Align="@Align.End">
-        <LumexNavbarItem>
+	<LumexNavbarContent Align="@Align.End">
+		<LumexNavbarItem>
 			<AuthorizeView>
 				<NotAuthorized>
-					<a href="/login">Login</a>
+					<LumexButton>
+						<a href="/login">Login</a>
+					</LumexButton>
 				</NotAuthorized>
 				<Authorized>
-					<div class="flex justify-center items-center">
+					<div @onclick="ViewProfile" class="flex justify-center items-center hover:scale-105 cursor-pointer">
 						<img class="w-12 h-12 p-1 bg-white rounded-full flex justify-center items-center" src="./images/user-image.jpg" alt="Alternate Text" />
 						@AppState.CurrentUser?.Username
 					</div>
 				</Authorized>
 			</AuthorizeView>
-        </LumexNavbarItem>
+		</LumexNavbarItem>
 		<LumexNavbarItem>
 			<AuthorizeView>
 				<Authorized>
@@ -32,7 +34,7 @@
 				</Authorized>
 			</AuthorizeView>
 		</LumexNavbarItem>
-    </LumexNavbarContent>
+	</LumexNavbarContent>
 </LumexNavbar>
 
 
@@ -40,24 +42,29 @@
 
 @code {
 	[CascadingParameter]
-	private Task<AuthenticationState> authenticationStateTask{ get; set; }
-	
+	private Task<AuthenticationState> authenticationStateTask { get; set; }
+
 
 	private bool _darkMode = false;
 
 	protected override async void OnInitialized()
 	{
-		
+
 		var authenticationState = await authenticationStateTask;
 		// if(!authenticationState.User.Identity.IsAuthenticated)
 		// {
-		// 	NavigationManager.NavigateTo("/login");		
+		// 	NavigationManager.NavigateTo("/login");
 		// }
-		if(AppState.CurrentUser == null)
+		if (AppState.CurrentUser == null)
 		{
 			string username = authenticationState.User.Identity.Name;
 			User user = context.Users.FirstOrDefault(u => u.Username == username);
 			AppState.SetCurrentUser(user);
 		}
+	}
+
+	private void ViewProfile()
+	{
+		NavigationManager.NavigateTo($"/profile/{AppState.CurrentUser.Id}");
 	}
 }

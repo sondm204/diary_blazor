@@ -1,6 +1,5 @@
 ﻿@inject NavigationManager Navigation
 @rendermode InteractiveServer
-@using System.Text.RegularExpressions
 
 <div class="col-span-9 h-full p-8 dark:bg-gray-800 bg-white">
 	<div class="flex flex-col gap-2 justify-center items-center">
@@ -139,8 +138,10 @@
 
 	private MarkupString FilterContent(string html)
 	{
-		// Loại bỏ tất cả các thẻ <img ... />
-		string filtered = System.Text.RegularExpressions.Regex.Replace(html, @"<img[^>]*\/?>", "", RegexOptions.IgnoreCase);
+		string filtered = Regex.Replace(html, @"<img[^>]*\/?>", "", RegexOptions.IgnoreCase);
+		filtered = Regex.Replace(filtered, @"<\/?p[^>]*>", "", RegexOptions.IgnoreCase);
+		filtered = Regex.Replace(filtered, @"\s{2,}", " ");
+		filtered = filtered.Trim();
 		return new MarkupString(filtered);
 	}
 
