@@ -228,6 +228,7 @@
 			Username = username,
 			Email = email,
 			Password = BCrypt.HashPassword(password),
+			IsGuest = 0,
 			IsPublic = isPublic == true ? (byte)1 : (byte)0,
 			CreatedAt = DateTime.Now,
 		};

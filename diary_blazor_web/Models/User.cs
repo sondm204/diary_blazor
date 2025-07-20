@@ -17,6 +17,8 @@ public partial class User
 
     public string? Avatar { get; set; }
 
+    public byte? IsGuest { get; set; }
+
     public byte? IsPublic { get; set; }
 
     public DateTime? CreatedAt { get; set; }
@@ -26,4 +28,6 @@ public partial class User
     public virtual ICollection<Diary> Diaries { get; set; } = new List<Diary>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
+
+    public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

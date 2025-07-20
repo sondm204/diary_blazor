@@ -175,14 +175,9 @@
 	// DiaryContext context = new DiaryContext();
 	Diary diary = new Diary();
 	List<Tag>
-	allTags = new List<Tag>
-		();
-	List<Tag>
-		filterTags = new List<Tag>
-			();
-	List<Tag>
-		selectedTags = new List<Tag>
-			();
+	allTags = new List<Tag>();
+	List<Tag> filterTags = new List<Tag>();
+	List<Tag> selectedTags = new List<Tag>();
 	string tagSearchValue = "";
 	private bool IsPublic
 	{
@@ -217,7 +212,7 @@
 			diary = new Diary();
 		}
 
-		allTags = context.Tags.ToList();
+		allTags = context.Tags.Where(t => t.UserId == AppState.CurrentUser.Id).ToList();
 
 		isCreate = id == null;
 	}

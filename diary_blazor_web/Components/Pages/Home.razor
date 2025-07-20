@@ -45,18 +45,26 @@
 
 				@* content *@
 				<div class="w-full bg-white p-8 flex flex-col gap-2 dark:bg-gray-800 dark:text-white">
-					<div class="flex items-center justify-between">
+					<div class="flex items-center gap-4">
 						<LumexSelect TValue="string"
-									 Label=""
+									 Label="Trạng thái"
 									 Class="w-52"
-									 @bind-Value="@(_selectedFilter)">
-							@foreach (var filter in _filter)
+									 @bind-Value="@(_selectedStatusFilter)">
+							@foreach (var filter in _statusFilter)
 							{
 								<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
 							}
 
 						</LumexSelect>
-						<div>Quản lý</div>
+						<LumexSelect TValue="string"
+									 Label="Nhãn"
+									 Class="w-52"
+									 @bind-Value="@(_selectedTagFilter)">
+							@foreach (var filter in _tagFilter)
+							{
+								<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
+							}
+						</LumexSelect>
 					</div>
 					<div class="flex flex-col gap-4">
 						@if (diaries.Count == 0)
@@ -99,8 +107,10 @@
 
 	private bool isAuthorized = false;
 	private List<Diary> allDiaries = new List<Diary>();
-	private Dictionary<string, string> _filter = new Dictionary<string, string>();
-	private string _selectedFilter = "all";
+	private Dictionary<string, string> _statusFilter = new Dictionary<string, string>();
+	private Dictionary<string, string> _tagFilter = new Dictionary<string, string>();
+	private string _selectedStatusFilter = "all";
+	private string _selectedTagFilter = "all";
 
 
 	// DiaryContext context = new DiaryContext();
@@ -170,18 +180,28 @@
 
 	private void resetFilter()
 	{
-		_filter = new()
+		_statusFilter = new()
 		{
 			["all"] = $"Tất cả ({allDiaries.Count})",
 			["publish"] = $"Đã xuất bản ({allDiaries.Where(d => d.IsPublic == 1).ToList().Count})",
 			["draft"] = $"Chưa xuất bản ({allDiaries.Where(d => d.IsPublic == 0).ToList().Count})",
 			["trash"] = $"Thùng rác ({allDiaries.Where(d => d.IsActive == 0).ToList().Count})"
 		};
+
+		List<Tag> allTags = context.Tags.Where(t => t.UserId == id).ToList();
+		_tagFilter = new()
+		{
+			["all"] = $"Tất cả ({allDiaries.Count})",
+		};
+		foreach (var tag in allTags)
+		{
+			_tagFilter.Add(tag.Id, $"{tag.Name} ({allDiaries.Where(d => d.Tags.Any(t => t.Id == tag.Id)).ToList().Count})");
+		}
 	}
 
 	private void HandleFilter()
 	{
-		switch (_selectedFilter)
+		switch (_selectedStatusFilter)
 		{
 			case "publish":
 				diaries = allDiaries.Where(d => d.IsPublic == 1).ToList();
@@ -194,6 +214,15 @@
 				break;
 			default:
 				diaries = allDiaries.Where(d => d.IsActive == 1).ToList();
+				break;
+		}
+
+		switch (_selectedTagFilter)
+		{
+			case "all":
+				break;
+			default:
+				diaries = diaries.Where(d => d.Tags.Any(t => t.Id == _selectedTagFilter)).ToList();
 				break;
 		}
 	}

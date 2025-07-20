@@ -9,4 +9,9 @@
 @code {
 	[Parameter] public string id { get; set; }
 	[Parameter] public string userId { get; set; }
+
+	private void OnInitialized()
+	{
+		AppState.CurrentViewId = userId;
+	}
 }

@@ -3,7 +3,7 @@
 
 <LumexNavbar Sticky Bordered Height="60px" Class="bg-gray-100">
     <LumexNavbarContent Align="@Align.Start">
-        <a href=@($"/dashboard/{AppState.CurrentUser?.Id}") class="flex items-center text-lg font-bold no-underline">
+        <a href=@(AppState.CurrentUser?.IsGuest == 0 ? $"/dashboard/{AppState.CurrentUser?.Id}" : $"/view/{AppState.CurrentViewId}") class="flex items-center text-lg font-bold no-underline">
 		<img src="images/logo.png" alt="Logo" width="50" />
 		<span class="text-2xl translate-y-3 -translate-x-1 text-blue-600">iary</span>
 	</a>
@@ -62,6 +62,7 @@
 
 	protected override async void OnInitialized()
 	{
+		
 		var authenticationState = await authenticationStateTask;
 		// if(!authenticationState.User.Identity.IsAuthenticated)
 		// {

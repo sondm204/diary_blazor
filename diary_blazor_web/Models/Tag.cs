@@ -10,4 +10,7 @@ public partial class Tag
     public string? Name { get; set; }
 
     public virtual ICollection<Diary> Diaries { get; set; } = new List<Diary>();
+
+    public string? UserId { get; set; }
+    public virtual User? User { get; set; } = null!;
 }

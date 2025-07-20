@@ -56,7 +56,7 @@
 		List<string> diaryIds = allDiaries.Select(d => d.Id).ToList();
 		allTags = context.Tags
 		.Include(t => t.Diaries)
-		.Where(t => t.Diaries.Any(d => diaryIds.Contains(d.Id) && d.UserId == UserId))
+		.Where(t => t.UserId == UserId)
 		.ToList();
 	}
 }

@@ -29,6 +29,7 @@
 				Random random = new Random();
 				user.Id = currentUserId;
 				user.Username = "user" + random.Next(100000, 1000000);
+				user.IsGuest = 1;
 				context.Users.Add(user);
 				context.SaveChanges();
 			}
@@ -46,6 +47,7 @@
 		.Where(d => d.UserId == id && d.IsActive == 1 && d.IsPublic == 1)
 		.OrderByDescending(d => d.PublicedAt).ToList();
 		diaries = allDiaries;
+		AppState.CurrentViewId = id;
 	}
 
 	private void HandleFilterTag(object? tagId)

@@ -189,6 +189,13 @@ public partial class DiaryContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Tags)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_tags_users");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -227,6 +234,9 @@ public partial class DiaryContext : DbContext
             entity.Property(e => e.IsPublic)
                .HasDefaultValue((byte)0)
                .HasColumnName("is_public");
+            entity.Property(e => e.IsGuest)
+               .HasDefaultValue((byte)1)
+               .HasColumnName("is_guest");
 
         });
 

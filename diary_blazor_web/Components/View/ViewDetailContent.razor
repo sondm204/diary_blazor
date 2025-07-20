@@ -102,7 +102,8 @@
 						user = new User
 						{
 							Id = currentUserId,
-							Username = "user" + new Random().Next(100000, 1000000)
+							Username = "user" + new Random().Next(100000, 1000000),
+							IsGuest = 1,
 						};
 
 						context.Users.Add(user);
