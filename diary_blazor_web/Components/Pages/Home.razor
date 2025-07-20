@@ -59,14 +59,21 @@
 						<div>Quản lý</div>
 					</div>
 					<div class="flex flex-col gap-4">
-						@foreach (var diary in diaries)
+						@if (diaries.Count == 0)
 						{
-							<DiaryItem Diary="@diary"
-									   UserId="@id"
-									   OnClick="() => NavigationToEditor(diary.Id)"
-									   OnHandlePublish="() => HandlePublish(diary.Id)"
-									   OnHandleTrash="() => HandleTrash(diary.Id)"
-									   OnHandleDelete="() => HandleDelete(diary.Id)" />
+							<div class="text-2xl font-bold text-center mt-20">Không có nhật ký nào</div>
+						}
+						else
+						{
+							@foreach (var diary in diaries)
+							{
+								<DiaryItem Diary="@diary"
+										   UserId="@id"
+										   OnClick="() => NavigationToEditor(diary.Id)"
+										   OnHandlePublish="() => HandlePublish(diary.Id)"
+										   OnHandleTrash="() => HandleTrash(diary.Id)"
+										   OnHandleDelete="() => HandleDelete(diary.Id)" />
+							}
 						}
 					</div>
 				</div>
@@ -130,7 +137,8 @@
 				if (authenticationState.User.Identity.Name != user.Username)
 				{
 					isAuthorized = false;
-				}else
+				}
+				else
 				{
 					isAuthorized = true;
 				}

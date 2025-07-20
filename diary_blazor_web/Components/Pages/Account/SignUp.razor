@@ -1,0 +1,238 @@
+﻿@page "/signup"
+@layout EmptyLayout
+@rendermode InteractiveServer
+
+
+
+<div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+	<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+		<div class="max-w-md w-full space-y-8">
+			<!-- Header -->
+			<div class="text-center">
+				<div class="mx-auto h-16 w-16 bg-gradient-to-r from-diary-purple to-diary-pink rounded-full flex items-center justify-center mb-4">
+					<svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+					</svg>
+				</div>
+				<h2 class="text-3xl font-bold text-gray-900 mb-2">Bắt đầu câu chuyện của bạn</h2>
+				<p class="text-gray-600">Tạo tài khoản và bắt đầu chia sẻ hành trình của bạn</p>
+			</div>
+
+			<!-- Signup Form -->
+			<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+				<div class="space-y-6">
+					<div>
+						<label for="first-name" class="block text-sm font-medium text-gray-700 mb-2">
+							Họ và tên
+						</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+								<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+								</svg>
+							</div>
+							<input id="first-name"
+								   name="first-name"
+								   type="text"
+								   @bind="fullname"
+								   autocomplete="given-name"
+								   required
+								   class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-diary-purple focus:border-transparent transition duration-200 placeholder-gray-400"
+								   placeholder="Họ và tên">
+						</div>
+					</div>
+
+					<div>
+						<label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+							Tên đăng nhập
+						</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+								<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+								</svg>
+							</div>
+							<input id="username"
+								   name="username"
+								   type="text"
+								   @bind="username"
+								   autocomplete="username"
+								   required
+								   class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-diary-purple focus:border-transparent transition duration-200 placeholder-gray-400"
+								   placeholder="Chọn tên đăng nhập duy nhất">
+						</div>
+						<p class="mt-1 text-xs text-gray-500">Đây sẽ là tên hiển thị của bạn</p>
+						@if (errors.ContainsKey("username"))
+						{
+							<p class="text-sm italic text-red-500">@errors["username"]</p>
+						}
+					</div>
+
+					<div>
+						<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+							Email
+						</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+								<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+								</svg>
+							</div>
+							<input id="email"
+								   name="email"
+								   type="email"
+								   @bind="email"
+								   autocomplete="email"
+								   required
+								   class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-diary-purple focus:border-transparent transition duration-200 placeholder-gray-400"
+								   placeholder="Nhập email">
+						</div>
+					</div>
+
+					<div>
+						<label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+							Mật khẩu
+						</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+								<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+								</svg>
+							</div>
+							<input id="password"
+								   name="password"
+								   type="password"
+								   @bind="password"
+								   autocomplete="new-password"
+								   required
+								   class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-diary-purple focus:border-transparent transition duration-200 placeholder-gray-400"
+								   placeholder="Nhập mật khẩu">
+						</div>
+					</div>
+
+					<div>
+						<label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
+							Nhập lại mật khẩu
+						</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+								<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+								</svg>
+							</div>
+							<input id="confirm-password"
+								   name="confirm-password"
+								   type="password"
+								   @bind="confirmPassword"
+								   autocomplete="new-password"
+								   required
+								   class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-diary-purple focus:border-transparent transition duration-200 placeholder-gray-400"
+								   placeholder="Nhập lại mật khẩu">
+						</div>
+						@if (errors.ContainsKey("confirmPassword"))
+						{
+							<p class="text-sm italic text-red-500">@errors["confirmPassword"]</p>
+						}
+					</div>
+
+					<div class="space-y-3">
+						<div class="flex items-start">
+							<div class="flex items-center h-5">
+								<input id="privacy-public"
+									   name="privacy"
+									   type="radio"
+									   @bind="isPublic"
+									   class="h-4 w-4 text-diary-purple focus:ring-diary-purple border-gray-300"
+									   checked>
+							</div>
+							<div class="ml-3 text-sm">
+								<label for="privacy-public" class="font-medium text-gray-700">Công khai</label>
+								<p class="text-gray-500">Người khác có thể quan sát trang cá nhân của bạn</p>
+							</div>
+						</div>
+						<div class="flex items-start">
+							<div class="flex items-center h-5">
+								<input id="privacy-private"
+									   name="privacy"
+									   type="radio"
+									   @bind="isPublic"
+									   class="h-4 w-4 text-diary-purple focus:ring-diary-purple border-gray-300">
+							</div>
+							<div class="ml-3 text-sm">
+								<label for="privacy-private" class="font-medium text-gray-700">Riêng tư</label>
+								<p class="text-gray-500">Giữ quyền riêng tư cho trang các nhân của bạn</p>
+							</div>
+						</div>
+					</div>
+
+
+					<div>
+						<button @onclick="HandleCreate"
+								class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-diary-purple to-diary-pink hover:from-diary-purple/90 hover:to-diary-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-diary-purple transition duration-200 transform hover:scale-[1.02]">
+							<span class="absolute left-0 inset-y-0 flex items-center pl-3">
+								<svg class="h-5 w-5 text-white/80 group-hover:text-white transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+								</svg>
+							</span>
+							Tạo nhật ký
+						</button>
+					</div>
+
+					<div class="text-center">
+						<p class="text-sm text-gray-600">
+							Bạn đã có tài khoản?
+							<a href="/login" class="font-medium text-diary-purple hover:text-diary-pink transition duration-200">
+								Đăng nhập ngay
+							</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string fullname;
+	private string username;
+	private string email;
+	private string password;
+	private string confirmPassword;
+	private bool isPublic = true;
+
+	private Dictionary<string, string> errors = new Dictionary<string, string>();
+
+	private void HandleCreate()
+	{
+		errors.Clear();
+		bool error = false;
+		User user = context.Users.FirstOrDefault(u => u.Username == username);
+		if (user != null)
+		{
+			errors.Add("username", "*Tên đăng nhập đã tồn tại");
+			error = true;
+		}
+		if (password != confirmPassword)
+		{
+			errors.Add("confirmPassword", "*Xác thực mật khẩu không đúng");
+			error = true;
+		}
+
+		if (error) return;
+
+		Guid newId = Guid.NewGuid();
+		User newUser = new User
+		{
+			Id = newId.ToString(),
+			Fullname = fullname,
+			Username = username,
+			Email = email,
+			Password = password,
+			IsPublic = isPublic == true ? (byte)1 : (byte)0,
+			CreatedAt = DateTime.Now,
+		};
+		context.Users.Add(newUser);
+		context.SaveChanges();
+		NavigationManager.NavigateTo("/login");
+	}
+}

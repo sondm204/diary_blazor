@@ -26,9 +26,9 @@
 					<a href="/login">Login</a>
 				</NotAuthorized>
 				<Authorized>
-					<div class="w-12 h-12 p-1 bg-white rounded-full flex justify-center items-center">
-						<img src="./images/user-image.jpg" alt="Alternate Text" />
-						@AppState.CurrentUser?.Id
+					<div class="flex justify-center items-center">
+						<img class="w-12 h-12 p-1 bg-white rounded-full flex justify-center items-center" src="./images/user-image.jpg" alt="Alternate Text" />
+						@AppState.CurrentUser?.Username
 					</div>
 				</Authorized>
 			</AuthorizeView>

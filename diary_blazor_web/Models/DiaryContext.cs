@@ -218,6 +218,16 @@ public partial class DiaryContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("username");
+            entity.Property(e => e.Fullname)
+               .HasMaxLength(50)
+               .HasColumnName("fullname");
+            entity.Property(e => e.Avatar)
+               .HasColumnType("text")
+               .HasColumnName("avatar");
+            entity.Property(e => e.IsPublic)
+               .HasDefaultValue((byte)0)
+               .HasColumnName("is_public");
+
         });
 
         OnModelCreatingPartial(modelBuilder);
