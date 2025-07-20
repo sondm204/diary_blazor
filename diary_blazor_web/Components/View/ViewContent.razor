@@ -37,10 +37,34 @@
 					</div>
 				</LumexCardBody>
 				<LumexDivider />
-				<LumexCardFooter Class="flex justify-evenly items-center py-3">
-					<LumexButton StartContent="@favoriteIcon" Class="@(AppState?.CurrentUser?.Likes?.Any(l => l.DiaryId == diary.Id) == true ? "text-red-500" : "text-gray-500")">Thích @diary.Likes.Count</LumexButton>
+				<LumexCardFooter Class="flex justify-evenly items-center py-3 overflow-visible">
+					<div @onclick:stopPropagation>
+						<LumexButton @onclick="() => HandleLike(diary.Id)"
+									 StartContent="@favoriteIcon"
+									 Class="@(AppState?.CurrentUser?.Likes?.Any(l => l.DiaryId == diary.Id) == true ? "text-red-500" : "text-gray-500")">
+							Thích @diary.Likes.Count
+						</LumexButton>
+					</div>
 					<LumexButton StartContent="@commentIcon" Class="text-gray-500">Bình luận @diary.Comments.Count</LumexButton>
-					<LumexButton StartContent="@shareIcon" Class="text-gray-500">Chia sẻ</LumexButton>
+					<div class="relative inline-block">
+						<span @onclick="() => TogglePopup(diary.Id)"
+							  @onclick:stopPropagation
+							  title="Chia sẻ"
+							  class="cursor-pointer text-2xl text-gray-500 hover:text-blue-500">
+							<LumexButton StartContent="@shareIcon" Class="text-gray-500">Chia sẻ</LumexButton>
+						</span>
+
+						@if (showPopup)
+						{
+							<div @onclick:stopPropagation class="absolute z-[1000] mt-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg p-4 -translate-y-full -translate-x-full">
+								<input type="text" value="@ShareText" class="mb-2 text-sm text-gray-700 overflow-hidden whitespace-nowrap border p-2 text-ellipsis max-w-full">
+								<button @onclick="CopyToClipboard"
+										class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+									Copy
+								</button>
+							</div>
+						}
+					</div>
 				</LumexCardFooter>
 			</LumexCard>
 		}
@@ -69,10 +93,9 @@
 		{
 			_isInitialized = true;
 
-			if(AppState.CurrentUser == null)
+			if (AppState.CurrentUser == null)
 			{
 				string currentUserId = await JSRuntime.InvokeAsync<string>("createOrGetAnonymousUser");
-
 				if (currentUserId != null)
 				{
 					var user = context.Users
@@ -119,5 +142,52 @@
 		// Loại bỏ tất cả các thẻ <img ... />
 		string filtered = System.Text.RegularExpressions.Regex.Replace(html, @"<img[^>]*\/?>", "", RegexOptions.IgnoreCase);
 		return new MarkupString(filtered);
+	}
+
+	private bool showPopup = false;
+	private string ShareText = "";
+
+	private void TogglePopup(string id)
+	{
+		ShareText = $"https://localhost:7074/view/{UserId}/{id}";
+		showPopup = !showPopup;
+	}
+
+	private async Task CopyToClipboard()
+	{
+		ToastService.ShowSuccess("Đã sao chép liên kết chia sẻ thành công");
+		await JS.InvokeVoidAsync("navigator.clipboard.writeText", ShareText);
+	}
+
+	private void HandleLike(string id)
+	{
+		bool isLiked = AppState.CurrentUser.Likes.Any(item => item.DiaryId == id); ;
+		if (isLiked)
+		{
+			var like = AppState.CurrentUser.Likes.FirstOrDefault(item => item.DiaryId == id);
+			if (like != null)
+			{
+				context.Likes.Remove(like);
+				AppState.CurrentUser.Likes.Remove(like);
+				context.SaveChanges();
+			}
+			isLiked = false;
+		}
+		else
+		{
+			Guid guid = Guid.NewGuid();
+			string newLikeId = guid.ToString();
+			var newLike = new Like
+			{
+				Id = newLikeId,
+				UserId = AppState.CurrentUser.Id,
+				DiaryId = id,
+			};
+
+			context.Likes.Add(newLike);
+			AppState.CurrentUser.Likes.Add(newLike);
+			context.SaveChanges();
+			isLiked = true;
+		}
 	}
 }

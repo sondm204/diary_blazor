@@ -2,6 +2,7 @@
 @page "/editor"
 @rendermode InteractiveServer
 @inject IWebHostEnvironment env
+@implements IDisposable
 
 <PageTitle>Diary - Chỉnh sửa nhật ký</PageTitle>
 
@@ -44,13 +45,16 @@
 										</div>
 									}
 								</div>
-								<LumexTextbox Variant="InputVariant.Underlined" Value="@tagSearchValue" ValueChanged="HandleSearchTag" Type="@InputType.Text" Placeholder="Tìm nhãn..." />
+								<LumexTextbox Variant="InputVariant.Underlined" @bind-Value="tagSearchValue" @onkeyup="HandleSearchTag" Type="@InputType.Text" Placeholder="Tìm nhãn..." />
 								<LumexListbox TValue="string">
 									@foreach (var tag in filterTags)
 									{
 										<LumexListboxItem OnClick="() => HandleSelectTag(tag.Id)" Value="@tag.Id">@tag.Name</LumexListboxItem>
 									}
 								</LumexListbox>
+								<LumexButton Size="Size.Small" OnClick="HandleCreateTag" Class="mb-2">
+									Thêm nhãn
+								</LumexButton>
 							</div>
 						</LumexCollapse>
 					</div>
@@ -119,57 +123,7 @@
 </div>
 
 @code {
-	private string? previewUrl;
-	private string? croppedImageUrl;
-	private bool showCropper = false;
-	private IBrowserFile? selectedFile;
-
-	private async Task LoadImage(InputFileChangeEventArgs e)
-	{
-		selectedFile = e.File;
-
-		using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-		using var ms = new MemoryStream();
-		await stream.CopyToAsync(ms);
-
-		var buffer = ms.ToArray();
-		previewUrl = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
-
-		showCropper = true;
-		StateHasChanged();
-
-		// Delay nhỏ để ảnh render xong
-		await Task.Delay(300);
-		await JS.InvokeVoidAsync("cropperInterop.initCropper", "imageToCrop");
-	}
-
-	private async Task CropAndUpload()
-	{
-		try
-		{
-			string? base64 = await JS.InvokeAsync<string>("cropperInterop.getCroppedImage");
-			if (base64 != null)
-			{
-				var base64Data = base64.Split(',')[1];
-				var bytes = Convert.FromBase64String(base64Data);
-
-				// Lưu file
-				var fileName = Guid.NewGuid() + ".jpg";
-				var path = Path.Combine(env.WebRootPath, "uploads", fileName);
-				await File.WriteAllBytesAsync(path, bytes);
-
-				croppedImageUrl = $"/uploads/{fileName}";
-				showCropper = false;
-				StateHasChanged();
-			}
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine(e.Message);
-		}
-
-	}
-
+	private Boolean isSave = false;
 	private Boolean isCreate = false;
 	[Parameter] public string id { get; set; }
 	// DiaryContext context = new DiaryContext();
@@ -212,9 +166,25 @@
 			diary = new Diary();
 		}
 
-		allTags = context.Tags.Where(t => t.UserId == AppState.CurrentUser.Id).ToList();
+		if (AppState.CurrentUser != null)
+		{
+			allTags = context.Tags.Where(t => t.UserId == AppState.CurrentUser.Id).ToList();
+			filterTags = allTags;
 
+		}
 		isCreate = id == null;
+
+		NavigationManager.LocationChanged += OnLocationChanged;
+	}
+
+	private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+	{
+		HandleButtonClick();
+	}
+
+	public void Dispose()
+	{
+		NavigationManager.LocationChanged -= OnLocationChanged;
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -225,11 +195,14 @@
 		}
 	}
 
-	private void HandleSearchTag(string value)
+	private void HandleSearchTag(KeyboardEventArgs e)
 	{
-		filterTags = allTags
-		.Where(t => !string.IsNullOrEmpty(t.Name) && t.Name.Contains(value.Trim(), StringComparison.OrdinalIgnoreCase))
-		.ToList();
+		if (e.Key == "Enter")
+		{
+			filterTags = allTags
+			.Where(t => !string.IsNullOrEmpty(t.Name) && t.Name.Contains(tagSearchValue.Trim(), StringComparison.OrdinalIgnoreCase))
+			.ToList();
+		}
 	}
 
 	private void HandleSelectTag(string tagId)
@@ -238,8 +211,36 @@
 		if (!selectedTags.Contains(tag))
 		{
 			selectedTags.Add(tag);
+		}else
+		{
+			ToastService.ShowError("Nhãn dán đã tồn tại trong nhật ký");
 		}
 		tagSearchValue = "";
+	}
+
+	private void HandleCreateTag()
+	{
+		if (allTags.Any(t => t.Name.Equals(tagSearchValue, StringComparison.OrdinalIgnoreCase)))
+		{
+			ToastService.ShowError("Nhãn đã tồn tại");
+		}
+		else
+		{
+			Guid newId = Guid.NewGuid();
+			Tag newTag = new Tag
+			{
+				Id = newId.ToString(),
+				Name = tagSearchValue,
+				UserId = AppState.CurrentUser.Id
+			};
+			context.Tags.Add(newTag);
+			context.SaveChanges();
+			tagSearchValue = "";
+			selectedTags.Add(newTag);
+			allTags = context.Tags.Where(t => t.UserId == AppState.CurrentUser.Id).ToList();
+			filterTags = allTags;
+			StateHasChanged();
+		}
 	}
 
 	private Dictionary<string, bool>
@@ -261,6 +262,7 @@
 	{
 		if (isCreate) HandleCreate();
 		else HandleSubmit();
+		isSave = true;
 	}
 
 	private async void HandleSubmit()
@@ -338,6 +340,57 @@
 			NavigationManager.NavigateTo($"/editor/{newId}");
 		}
 		await ToastService.ShowSuccess("Tạo nhật ký thành công!");
+	}
+
+	private string? previewUrl;
+	private string? croppedImageUrl;
+	private bool showCropper = false;
+	private IBrowserFile? selectedFile;
+
+	private async Task LoadImage(InputFileChangeEventArgs e)
+	{
+		selectedFile = e.File;
+
+		using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+		using var ms = new MemoryStream();
+		await stream.CopyToAsync(ms);
+
+		var buffer = ms.ToArray();
+		previewUrl = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+		showCropper = true;
+		StateHasChanged();
+
+		// Delay nhỏ để ảnh render xong
+		await Task.Delay(300);
+		await JS.InvokeVoidAsync("cropperInterop.initCropper", "imageToCrop");
+	}
+
+	private async Task CropAndUpload()
+	{
+		try
+		{
+			string? base64 = await JS.InvokeAsync<string>("cropperInterop.getCroppedImage");
+			if (base64 != null)
+			{
+				var base64Data = base64.Split(',')[1];
+				var bytes = Convert.FromBase64String(base64Data);
+
+				// Lưu file
+				var fileName = Guid.NewGuid() + ".jpg";
+				var path = Path.Combine(env.WebRootPath, "uploads", fileName);
+				await File.WriteAllBytesAsync(path, bytes);
+
+				croppedImageUrl = $"/uploads/{fileName}";
+				showCropper = false;
+				StateHasChanged();
+			}
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e.Message);
+		}
+
 	}
 }
 
