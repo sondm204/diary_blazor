@@ -7,6 +7,8 @@
 		<i class="fa-regular fa-circle-left"></i>
 		Quay lại
 	</a>
+	@if(showDiary)
+	{
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col gap-4 shadow-lg rounded-lg border border-gray-200 p-4">
 			<div class="text-center text-3xl font-semibold">@diary.Title</div>
@@ -36,12 +38,18 @@
 				<LumexTextbox @bind-Value="currentCmt" @onkeyup="HandleKeyUp" Variant="InputVariant.Flat" Type="@InputType.Text" Placeholder="Nhập bình luận của bạn..." />
 			}
 		</div>
-	</div>
+		</div>
+
+	}else
+	{
+		<div class="text-center mt-10 text-2xl font-bold">Không xem được nhật ký</div>
+	}
 </div>
 
 @code {
 	[Parameter] public string id { get; set; }
 	[Parameter] public string UserId { get; set; }
+	private bool showDiary = false;
 
 	private RenderFragment favoriteIcon =>@<i class="fa-solid fa-heart"></i>;
 	// DiaryContext context = new DiaryContext();
@@ -65,17 +73,29 @@
 			.FirstOrDefault(d => d.Id == id);
 			if (diary != null)
 			{
+				if(diary.IsPublic == 1)
+				{
+					showDiary = true;
+				}
+				else
+				{
+					showDiary = false;
+				}
 				comments = context.Comments
 				.Include(c => c.User)
 				.Where(c => c.DiaryId == id)
 				.OrderBy(c => c.CreatedAt)
 				.ToList();
+			}else
+			{
+				showDiary = false;
 			}
 		}
 		else
 		{
 			diary = new Diary();
 		}
+		StateHasChanged();
 	}
 
 	private bool _isInitialized = false;
@@ -84,7 +104,6 @@
 		if (firstRender && !_isInitialized)
 		{
 			_isInitialized = true;
-
 			if (AppState.CurrentUser == null)
 			{
 

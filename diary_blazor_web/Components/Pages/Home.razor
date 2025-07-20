@@ -45,31 +45,41 @@
 
 				@* content *@
 				<div class="w-full bg-white p-8 flex flex-col gap-2 dark:bg-gray-800 dark:text-white">
-					<div class="flex items-center gap-4">
-						<LumexSelect TValue="string"
-									 Label="Trạng thái"
-									 Class="w-52"
-									 @bind-Value="@(_selectedStatusFilter)">
-							@foreach (var filter in _statusFilter)
-							{
-								<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
-							}
+					<div class="flex justify-between items-center">
+						<div class="flex items-center gap-4">
+							<LumexSelect TValue="string"
+										 Label="Trạng thái"
+										 Class="w-52"
+										 @bind-Value="@(_selectedStatusFilter)">
+								@foreach (var filter in _statusFilter)
+								{
+									<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
+								}
 
-						</LumexSelect>
-						<LumexSelect TValue="string"
-									 Label="Nhãn"
-									 Class="w-52"
-									 @bind-Value="@(_selectedTagFilter)">
-							@foreach (var filter in _tagFilter)
-							{
-								<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
-							}
-						</LumexSelect>
+							</LumexSelect>
+							<LumexSelect TValue="string"
+										 Label="Nhãn"
+										 Class="w-52"
+										 @bind-Value="@(_selectedTagFilter)">
+								@foreach (var filter in _tagFilter)
+								{
+									<LumexSelectItem @key=@filter Value="@filter.Key" OnClick="HandleFilter" TextValue="@filter.Value">@filter.Value</LumexSelectItem>
+								}
+							</LumexSelect>
+						</div>
+						<LumexTextbox Class="w-96"
+									  Type="@InputType.Search"
+									  Placeholder="Type to search..."
+									  @bind-Value="searchValue"
+									  @onkeyup="HandleSearch"
+									  LabelPlacement="@LabelPlacement.Outside"
+									  StartContent="@_searchIcon"
+									  Color="ThemeColor.Default" />
+
 					</div>
 					<div class="flex flex-col gap-4">
 						@if (diaries.Count == 0)
 						{
-							<div class="text-2xl font-bold text-center mt-20">Không có nhật ký nào</div>
 						}
 						else
 						{
@@ -114,7 +124,7 @@
 
 
 	// DiaryContext context = new DiaryContext();
-	List<Diary> diaries = new List<Diary>();
+	static List<Diary> diaries = new List<Diary>();
 	protected override async void OnInitialized()
 	{
 		ResetStatus();
@@ -182,38 +192,39 @@
 	{
 		_statusFilter = new()
 		{
-			["all"] = $"Tất cả ({allDiaries.Count})",
+			["all"] = $"Tất cả ({allDiaries.Where(d => d.IsActive == 1).ToList().Count})",
 			["publish"] = $"Đã xuất bản ({allDiaries.Where(d => d.IsPublic == 1).ToList().Count})",
-			["draft"] = $"Chưa xuất bản ({allDiaries.Where(d => d.IsPublic == 0).ToList().Count})",
+			["draft"] = $"Chưa xuất bản ({allDiaries.Where(d => d.IsPublic == 0 && d.IsActive == 1).ToList().Count})",
 			["trash"] = $"Thùng rác ({allDiaries.Where(d => d.IsActive == 0).ToList().Count})"
 		};
 
 		List<Tag> allTags = context.Tags.Where(t => t.UserId == id).ToList();
 		_tagFilter = new()
 		{
-			["all"] = $"Tất cả ({allDiaries.Count})",
+			["all"] = $"Tất cả ({allDiaries.Where(d => d.IsActive == 1).ToList().Count})",
 		};
 		foreach (var tag in allTags)
 		{
-			_tagFilter.Add(tag.Id, $"{tag.Name} ({allDiaries.Where(d => d.Tags.Any(t => t.Id == tag.Id)).ToList().Count})");
+			_tagFilter.Add(tag.Id, $"{tag.Name} ({allDiaries.Where(d => d.IsActive == 1 &&  d.Tags.Any(t => t.Id == tag.Id)).ToList().Count})");
 		}
 	}
 
 	private void HandleFilter()
 	{
+		diaries = allDiaries.Where(d => d.IsActive == 1).ToList();
 		switch (_selectedStatusFilter)
 		{
 			case "publish":
-				diaries = allDiaries.Where(d => d.IsPublic == 1).ToList();
+				diaries = diaries.Where(d => d.IsPublic == 1).ToList();
 				break;
 			case "draft":
-				diaries = allDiaries.Where(d => d.IsPublic == 0).ToList();
+				diaries = diaries.Where(d => d.IsPublic == 0).ToList();
 				break;
 			case "trash":
-				diaries = allDiaries.Where(d => d.IsActive == 0).ToList();
+				diaries = context.Diaries.Where(d => d.IsActive == 0).ToList();
 				break;
 			default:
-				diaries = allDiaries.Where(d => d.IsActive == 1).ToList();
+				diaries = diaries.Where(d => d.IsActive == 1).ToList();
 				break;
 		}
 
@@ -225,6 +236,39 @@
 				diaries = diaries.Where(d => d.Tags.Any(t => t.Id == _selectedTagFilter)).ToList();
 				break;
 		}
+
+		if (searchValue == "")
+		{
+			diaries = diaries.ToList();
+		}
+		else
+		{
+			diaries = diaries.Where(d => d.Title.Contains(searchValue.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+		}
+	}
+
+	private RenderFragment _searchIcon =
+		@<LumexIcon Icon="@Icons.Rounded.Search"
+					Size="@new("20")"
+					Class="text-default-400 shrink-0">
+		</LumexIcon>
+			;
+	private string searchValue = "";
+	private void HandleSearch(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			if (searchValue == "")
+			{
+				diaries = allDiaries.Where(d => d.IsActive == 1).ToList();
+			}
+			else
+			{
+				diaries = allDiaries.Where(d => d.Title.Contains(searchValue.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+			}
+		}
+
+		HandleFilter();
 	}
 
 	private async void HandlePublish(string id)

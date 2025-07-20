@@ -9,16 +9,6 @@
 	</a>
     </LumexNavbarContent>
 
-    <LumexNavbarContent Align="@Align.Center">
-        <LumexNavbarItem Class="md:w-[30rem] sm:w-[20rem]">
-            <LumexTextbox Type="@InputType.Search"
-				  Placeholder="Type to search..."
-				  LabelPlacement="@LabelPlacement.Outside"
-				  StartContent="@_searchIcon" 
-				  Color="ThemeColor.Default"/>
-        </LumexNavbarItem>
-    </LumexNavbarContent>
-
     <LumexNavbarContent Align="@Align.End">
         <LumexNavbarItem>
 			<AuthorizeView>
@@ -51,12 +41,7 @@
 @code {
 	[CascadingParameter]
 	private Task<AuthenticationState> authenticationStateTask{ get; set; }
-	private RenderFragment _searchIcon =
-        @<LumexIcon Icon="@Icons.Rounded.Search"
-                    Size="@new("20")"
-                    Class="text-default-400 shrink-0">
-        </LumexIcon>
-	;
+	
 
 	private bool _darkMode = false;
 
