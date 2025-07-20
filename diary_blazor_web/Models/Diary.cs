@@ -15,6 +15,8 @@ public partial class Diary
 
     public string? Content { get; set; }
 
+    public string? Thumbnail { get; set; }
+
     public byte? IsActive { get; set; }
 
     public byte? IsPublic { get; set; }

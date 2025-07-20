@@ -85,6 +85,9 @@ public partial class DiaryContext : DbContext
             entity.Property(e => e.Content)
                 .HasColumnType("ntext")
                 .HasColumnName("content");
+            entity.Property(e => e.Thumbnail)
+                .HasColumnType("text")
+                .HasColumnName("thumbnail");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

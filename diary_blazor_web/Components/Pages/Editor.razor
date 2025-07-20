@@ -1,13 +1,14 @@
 ﻿@page "/editor/{id}"
 @page "/editor"
 @rendermode InteractiveServer
+@inject IWebHostEnvironment env
 
 <PageTitle>Diary - Chỉnh sửa nhật ký</PageTitle>
 
 <div class="grid grid-cols-12 h-screen">
 	<div class="col-span-10">
 		<LumexTextbox Type="@InputType.Text"
-					  Size="Size.Large"
+					  Size="LumexUI.Common.Size.Large"
 					  @bind-Value="diary.Title"
 					  Label="Tiêu đề"
 					  Placeholder="Nhập tiêu đề"
@@ -78,20 +79,110 @@
 							</LumexCheckboxGroup>
 						</LumexCollapse>
 					</div>
+					<div class="border-b border-b-gray-300">
+						<div class="flex gap-2 w-full cursor-pointer p-4 hover:bg-gray-200 rounded-lg" @onclick="@(() => ToggleExpansion("thumbnail"))">
+							<span class="@(_expanded["thumbnail"] ? "rotate-180" : "")"><i class="fa-solid fa-caret-down"></i></span>
+							<span>Thumbnail</span>
+						</div>
+						<LumexCollapse As="ul"
+									   Expanded="@_expanded["thumbnail"]"
+									   Class="ml-4">
+							@* <img src="@diary.Thumbnail" alt="Alternate Text" /> *@
+							@if (croppedImageUrl != null)
+							{
+								<img src="@croppedImageUrl" class="w-20 h-20 object-cover rounded" style="max-width: 300px;" />
+							}
+							<InputFile class="mt-3" OnChange="LoadImage" accept="image/*" />
+
+						</LumexCollapse>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	@if (showCropper)
+	{
+		<div class="fixed top-0 right-0 bottom-0 left-0 bg-black/75 z-[1000]">
+			<div class="flex justify-center items-center w-full h-full">
+				<div class="flex flex-col gap-2">
+					<img @key="previewUrl" class="w-1/2 h-1/2" id="imageToCrop" src="@previewUrl" style="max-width: 100%; width: 400px; height: auto; object-fit: cover" />
+					<div class="flex gap-2 justify-center">
+						<LumexButton OnClick="() => showCropper = false">Hủy</LumexButton>
+						<LumexButton Color="ThemeColor.Primary" OnClick="CropAndUpload">Cắt và Lưu</LumexButton>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	}
 </div>
 
 @code {
+	private string? previewUrl;
+	private string? croppedImageUrl;
+	private bool showCropper = false;
+	private IBrowserFile? selectedFile;
+
+	private async Task LoadImage(InputFileChangeEventArgs e)
+	{
+		selectedFile = e.File;
+
+		using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+		using var ms = new MemoryStream();
+		await stream.CopyToAsync(ms);
+
+		var buffer = ms.ToArray();
+		previewUrl = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+		showCropper = true;
+		StateHasChanged();
+
+		// Delay nhỏ để ảnh render xong
+		await Task.Delay(300);
+		await JS.InvokeVoidAsync("cropperInterop.initCropper", "imageToCrop");
+	}
+
+	private async Task CropAndUpload()
+	{
+		try
+		{
+			string? base64 = await JS.InvokeAsync<string>("cropperInterop.getCroppedImage");
+			if (base64 != null)
+			{
+				var base64Data = base64.Split(',')[1];
+				var bytes = Convert.FromBase64String(base64Data);
+
+				// Lưu file
+				var fileName = Guid.NewGuid() + ".jpg";
+				var path = Path.Combine(env.WebRootPath, "uploads", fileName);
+				await File.WriteAllBytesAsync(path, bytes);
+
+				croppedImageUrl = $"/uploads/{fileName}";
+				showCropper = false;
+				StateHasChanged();
+			}
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e.Message);
+		}
+
+	}
+
 	private Boolean isCreate = false;
 	[Parameter] public string id { get; set; }
 	// DiaryContext context = new DiaryContext();
 	Diary diary = new Diary();
-	List<Tag> allTags = new List<Tag>();
-	List<Tag> filterTags = new List<Tag>();
-	List<Tag> selectedTags = new List<Tag>();
+	List<Tag>
+	allTags = new List<Tag>
+		();
+	List<Tag>
+		filterTags = new List<Tag>
+			();
+	List<Tag>
+		selectedTags = new List<Tag>
+			();
 	string tagSearchValue = "";
 	private bool IsPublic
 	{
@@ -118,6 +209,7 @@
 			if (diary != null)
 			{
 				selectedTags = diary.Tags.ToList();
+				croppedImageUrl = diary.Thumbnail;
 			}
 		}
 		else
@@ -155,12 +247,15 @@
 		tagSearchValue = "";
 	}
 
-	private Dictionary<string, bool> _expanded = new Dictionary<string, bool>()
-	{
-		{ "tag", true },
-		{ "publish", true },
-		{ "share", true},
-	};
+	private Dictionary<string, bool>
+		_expanded = new Dictionary<string, bool>
+			()
+			{
+								{ "tag", true },
+								{ "publish", true },
+								{ "share", true},
+								{ "thumbnail", true},
+			};
 
 	private void ToggleExpansion(string key)
 	{
@@ -175,25 +270,29 @@
 
 	private async void HandleSubmit()
 	{
-		diary.Content = await JS.InvokeAsync<string>("getTinyMCEContent", "editor");
+		diary.Content = await JS.InvokeAsync<string>
+			("getTinyMCEContent", "editor");
 		diary.Tags = selectedTags;
 		diary.UpdatedAt = DateTime.Now;
-		if(!IsPublic)
+		diary.Thumbnail = croppedImageUrl ?? diary.Thumbnail;
+		if (!IsPublic)
 		{
 			diary.PublicedAt = null;
 			diary.IsPublic = 0;
-		}else
+		}
+		else
 		{
 			diary.IsPublic = 1;
-			if(diary.PublicedAt == null)
+			if (diary.PublicedAt == null)
 			{
 				diary.PublicedAt = DateTime.Now;
 			}
 		}
-		if(AllowComments)
+		if (AllowComments)
 		{
 			diary.AllowComments = 1;
-		}else
+		}
+		else
 		{
 			diary.AllowComments = 0;
 		}
@@ -201,14 +300,15 @@
 		await ToastService.ShowSuccess("Cập nhật thành công!");
 	}
 
-	private async void HandleCreate()  
-	{  
-		JS.InvokeVoidAsync("console.log", "create: " + diary.Content);  
+	private async void HandleCreate()
+	{
+		JS.InvokeVoidAsync("console.log", "create: " + diary.Content);
 		Guid newId = Guid.NewGuid();
 		diary.Id = newId.ToString();
 		diary.Tags = selectedTags;
 		diary.UpdatedAt = DateTime.Now;
 		diary.UserId = AppState.CurrentUser.Id;
+		diary.Thumbnail = croppedImageUrl ?? diary.Thumbnail;
 		if (!IsPublic)
 		{
 			diary.PublicedAt = null;
@@ -231,12 +331,14 @@
 		context.Diaries.Add(diary);
 		try
 		{
-			context.SaveChanges();  
+			context.SaveChanges();
 
-		}catch(Exception e)
+		}
+		catch (Exception e)
 		{
 
-		}finally
+		}
+		finally
 		{
 			NavigationManager.NavigateTo($"/editor/{newId}");
 		}

@@ -1,7 +1,8 @@
 ﻿<div @onclick="OnClick" class="shadow-lg p-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-200 dark:hover:bg-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white cursor-pointer">
 	<div class="flex justify-between">
 		<div class="flex gap-2 items-center">
-			<img class="w-20 h-20 rounded-lg" src="https://mediawinwin.vn/upload/images/sanpham/bao-gia-chup-mon-an-dich-vu-chup-anh-do-an-chuyen-nghiep-5.JPG" alt="Alternate Text" />
+			@* <img class="w-20 h-20 rounded-lg" src="https://mediawinwin.vn/upload/images/sanpham/bao-gia-chup-mon-an-dich-vu-chup-anh-do-an-chuyen-nghiep-5.JPG" alt="Alternate Text" /> *@
+			<img class="w-20 h-20 rounded-lg" src=@(Diary.Thumbnail ?? "./images/default-image.webp") alt="Alternate Text" />
 			<div class="flex flex-col gap-2">
 				<h1 class="font-bold text-lg">@Diary.Title</h1>
 				@if (Diary.PublicedAt == null)

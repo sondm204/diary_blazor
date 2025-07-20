@@ -9,7 +9,7 @@
 			Chào mừng đến với nhật ký cá nhân của tôi. Tại đây tôi chia sẻ những suy nghĩ, kinh nghiệm và suy ngẫm của mình về hành trình cuộc sống.
 		</p>
 	</div>
-	<div class="flex flex-col gap-4 mt-4">
+	<div class="grid grid-cols-12 gap-4 mt-4">
 		@* card *@
 		@if (Diaries.Count == 0)
 		{
@@ -17,9 +17,9 @@
 		}
 		@foreach (var diary in Diaries)
 		{
-			<LumexCard @onclick="() => NavigateToDetail(diary.Id)" Shadow="Shadow.Large" Class="hover:translate-y-[-5px] hover:shadow-2xl !transition-all duration-300 cursor-pointer">
+			<LumexCard @onclick="() => NavigateToDetail(diary.Id)" Shadow="Shadow.Large" Class="col-span-6 hover:translate-y-[-5px] hover:shadow-2xl !transition-all duration-300 cursor-pointer">
 				<LumexCardHeader Class="p-0 h-64 w-full">
-					<img class="w-full" src="https://media.istockphoto.com/id/1457889029/photo/group-of-food-with-high-content-of-dietary-fiber-arranged-side-by-side.jpg?s=612x612&w=0&k=20&c=SEyObHsbBsrd1XZlgEg389VT86BMFKZKfKReKyVPAk4=" alt="@diary.Title" />
+					<img class="w-full" src="@diary.Thumbnail" alt="@diary.Title" />
 				</LumexCardHeader>
 				<LumexCardBody>
 					<div class="text-center font-bold text-2xl">@diary.Title</div>
